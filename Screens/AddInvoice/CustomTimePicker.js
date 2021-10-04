@@ -5,7 +5,9 @@ import {
   View,
   Modal,
   TouchableOpacity,
+  TouchableHighlight,
   Platform,
+  TouchableWithoutFeedback,
 } from 'react-native';
 
 import { Picker } from '@react-native-picker/picker';
@@ -27,37 +29,39 @@ const CustomTimePicker = ({
   };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => setModalOpen(true)}
-    >
-      <Text style={styles.textStyle}>{value}</Text>
+    <View>
+      <TouchableOpacity onPress={() => setModalOpen(true)}>
+        <Text style={styles.textStyle}>{value}</Text>
+      </TouchableOpacity>
       <Modal
         transparent={true}
         animationType="slide"
         visible={modalOpen}
+        supportedOrientations={['portrait']}
         onRequestClose={() => setModalOpen(false)}
       >
-        <View style={{ flex: 1 }}>
-          <View style={styles.touchableOp}>
-            <TouchableOpacity onPress={() => setModalOpen(false)}>
-              <Text
-                style={{ fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}
+        {/* This will close the modal clicking out of it */}
+
+        <TouchableOpacity
+          onPressOut={() => setModalOpen(false)}
+          style={{ flex: 1 }}
+          activeOpacity={1}
+          visible={modalOpen}
+        >
+          <TouchableWithoutFeedback>
+            <View style={styles.touchableOp}>
+              <Picker
+                selectedValue={value}
+                style={{ height: 50, width: '100%' }}
+                onValueChange={(itemValue, itemIndex) => setValue(itemValue)}
               >
-                Close
-              </Text>
-            </TouchableOpacity>
-            <Picker
-              selectedValue={value}
-              style={{ height: 50, width: '100%' }}
-              onValueChange={(itemValue, itemIndex) => setValue(itemValue)}
-            >
-              {pickerData(items)}
-            </Picker>
-          </View>
-        </View>
+                {pickerData(items)}
+              </Picker>
+            </View>
+          </TouchableWithoutFeedback>
+        </TouchableOpacity>
       </Modal>
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -67,12 +71,11 @@ const styles = StyleSheet.create({
   touchableOp: {
     backgroundColor: 'white',
     width: '100%',
-    height: '40%',
+    height: '35%',
     position: 'absolute',
     bottom: 0,
   },
   container: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

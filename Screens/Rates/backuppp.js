@@ -494,3 +494,90 @@ const styles = StyleSheet.create({
 //     </Text>
 //   </TouchableOpacity>
 // ))}
+
+//controlls the TIME inputs
+// useEffect(() => {
+//   const start = initHours + ':' + initMinutes;
+//   const finish = finishHours + ':' + finishMinutes;
+
+//   const startDecimal = initHours + '.' + initMinutes;
+//   const finishDecimal = finishHours + '.' + finishMinutes;
+//   const hoursNotFormatted = finishDecimal - startDecimal;
+
+//   if (finishDecimal < startDecimal) {
+//     Alert.alert('Start time cannot be less than Finish time!');
+//     setStartTime('');
+//     setFinishTime('');
+//     setTotalHours('');
+//     setTotalAmount('');
+//   } else if (startDecimal < finishDecimal) {
+//     setStartTime(start);
+//     setFinishTime(finish);
+//     setTotalHours(hoursNotFormatted.toFixed(2).toString());
+
+//     const totalAmounts = rate * totalHours;
+//     setTotalAmount(totalAmounts.toFixed(2).toString());
+//   }
+// }, [initHours, initMinutes, finishHours, finishMinutes, totalHours, rateDay]);
+
+
+return (
+  <TouchableOpacity onPress={() => setModalOpen(true)}>
+    <View>
+      <Text style={styles.textStyle}>{value}</Text>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={modalOpen}
+        supportedOrientations={['portrait']}
+        onRequestClose={() => setModalOpen(false)}
+      >
+        <View style={{ flex: 1 }}>
+          {/* This will close the modal clicking out of it */}
+          <TouchableOpacity
+            onPress={() => setModalOpen(false)}
+            style={{ flex: 1 }}
+            activeOpacity={1}
+            visible={modalOpen}
+          >
+            <TouchableHighlight
+              underlayColor={'#FFFFFF'}
+              style={{
+                flex: 1,
+              }}
+            >
+              <View style={styles.touchableOp}>
+                <TouchableOpacity
+                  onPress={() => setModalOpen(false)}
+                  underlayColor={'transparent'}
+                >
+                  <Text
+                    style={{
+                      fontWeight: 'bold',
+                      marginLeft: 10,
+                      fontSize: 18,
+                    }}
+                  >
+                    Close
+                  </Text>
+                </TouchableOpacity>
+                <View>
+                  <Picker
+                    selectedValue={value}
+                    style={{ height: 50, width: '100%' }}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setValue(itemValue)
+                    }
+                  >
+                    {pickerData(items)}
+                  </Picker>
+                </View>
+              </View>
+            </TouchableHighlight>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </View>
+  </TouchableOpacity>
+);
+};

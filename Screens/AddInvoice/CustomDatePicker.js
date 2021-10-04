@@ -71,7 +71,8 @@ const CustomDatePicker = (props) => {
             onRequestClose={() => setShow(false)}
           >
             <View style={{ flex: 1 }}>
-              <TouchableHighlight
+              {/* This will close the modal clicking out of it */}
+              <TouchableOpacity
                 style={{
                   flex: 1,
                   alignItems: 'flex-end',
@@ -114,7 +115,7 @@ const CustomDatePicker = (props) => {
                     </TouchableHighlight>
                   </View>
                 </TouchableHighlight>
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
           </Modal>
         )}

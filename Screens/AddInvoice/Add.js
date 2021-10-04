@@ -31,24 +31,6 @@ import { hours as dataHours, minutes as dataMinutes } from '../../assets/data';
 var defaultDay = moment().format('DD-MM-YYYY');
 
 const Add = ({ navigation, route }) => {
-  // const getDetails = (type) => {
-  //   if (route.params) {
-  //     switch (type) {
-  //       case 'location':
-  //         return route.params.location;
-  //       case 'child':
-  //         return route.params.child;
-
-  //       case 'day':
-  //         return route.params.day;
-
-  //       case 'amount':
-  //         return route.params.amount;
-  //     }
-  //   }
-  //   return '';
-  // };
-
   const [location, setLocation] = useState('');
   const [comments, setComments] = useState('');
   const [child, setChild] = useState('');
@@ -61,7 +43,7 @@ const Add = ({ navigation, route }) => {
   const [rate, setRate] = useState();
   const [totalAmount, setTotalAmount] = useState('');
 
-  //const [confirmModal, setConfirmModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
   const [modalHSOpen, setModalHSOpen] = useState(false);
   const [modalHFOpen, setModalHFOpen] = useState(false);
   const [modalMSOpen, setModalMSOpen] = useState(false);
@@ -72,8 +54,11 @@ const Add = ({ navigation, route }) => {
   const [finishMinutes, setFinishMinutes] = useState('00');
   const [startTime, setStartTime] = useState('');
   const [finishTime, setFinishTime] = useState('');
+  const [startTimeValidation, setStartTimeValidation] = useState('');
+  const [finishTimeValidation, setFinishTimeValidation] = useState('');
 
   const [data, setData] = useState([]);
+  const [test, setTest] = useState();
 
   const ratesReg = useSelector((state) => {
     return state.rateR;
@@ -90,65 +75,51 @@ const Add = ({ navigation, route }) => {
     const finishDecimal = finishHours + '.' + finishMinutes;
     const hoursNotFormatted = finishDecimal - startDecimal;
 
-    if (finishDecimal < startDecimal) {
-      Alert.alert('Start time cannot be less than Finish time!');
-      setStartTime('');
-      setFinishTime('');
-      setTotalHours('');
-      setTotalAmount('');
-    } else if (startDecimal < finishDecimal) {
-      setStartTime(start);
-      setFinishTime(finish);
-      setTotalHours(hoursNotFormatted.toFixed(2).toString());
+    setStartTimeValidation(startDecimal);
+    setFinishTimeValidation(finishDecimal);
+    setStartTime(start);
+    setFinishTime(finish);
+    setTotalHours(hoursNotFormatted.toFixed(2).toString());
 
-      const totalAmounts = rate * totalHours;
-      setTotalAmount(totalAmounts.toFixed(2).toString());
-    }
+    const totalAmounts = rate * totalHours;
+    setTotalAmount(totalAmounts.toFixed(2).toString());
   }, [initHours, initMinutes, finishHours, finishMinutes, totalHours, rateDay]);
 
   const handleAddDay = () => {
-    if (location === '') {
-      alert('Location cannot be empty');
-    } else if (child === '') {
-      alert('Child cannot be empty');
-    } else if (totalHours === '') {
-      alert('Child cannot be empty');
-    } else {
-      let details = {
-        rateDay,
-        date,
-        startTime,
-        finishTime,
-        location,
-        child,
-        totalHours,
-        comments,
-        totalAmount,
-      };
+    let details = {
+      rateDay,
+      date,
+      startTime,
+      finishTime,
+      location,
+      child,
+      totalHours,
+      comments,
+      totalAmount,
+    };
 
-      //console.log(details);
+    //console.log(details);
 
-      axios
-        .post(`${baseURL}adds`, details)
-        .then((res) => [
-          setData([...data, res.data]),
-          alert('new day added'),
-          dispatch({ type: 'ADD_DAY', payload: [...data, res.data] }),
-        ])
-        .catch((error) => {
-          [alert('Something went wrong, try again'), console.error(error)];
-        });
+    axios
+      .post(`${baseURL}adds`, details)
+      .then((res) => [
+        setData([...data, res.data]),
+        alert('new day added'),
+        dispatch({ type: 'ADD_DAY', payload: [...data, res.data] }),
+      ])
+      .catch((error) => {
+        [alert('Something went wrong, try again'), console.error(error)];
+      });
 
-      setLocation('');
-      setComments('');
-      setChild('');
-      setInitHours('1');
-      setInitMinutes('00');
-      setFinishHours('1');
-      setFinishMinutes('00');
-      setTotalHours('');
-      setTotalAmount('');
-    }
+    setLocation('');
+    setComments('');
+    setChild('');
+    setInitHours('1');
+    setInitMinutes('00');
+    setFinishHours('1');
+    setFinishMinutes('00');
+    setTotalHours('');
+    setTotalAmount('');
   };
 
   //essa func tava sendo usada com Flatlist e ratesReg como data
@@ -177,26 +148,32 @@ const Add = ({ navigation, route }) => {
     //console.log(newDateFormatted);
   };
 
-  // const calcRate = () => {
-  //   if (location === '' || child === '') {
-  //     alert('Location and Child cannot be empty');
-  //   } else {
-  //     const details = {
-  //       rateDay,
-  //       date,
-  //       startTime,
-  //       finishTime,
-  //       location,
-  //       child,
-  //       totalHours,
-  //       comments,
-  //       totalAmount,
-  //     };
-  //     //console.log(details);
-  //     setData(details);
-  //     setConfirmModal(true);
-  //   }
-  // };
+  const calcRate = () => {
+    if (location === '' || child === '') {
+      alert('Location and Child cannot be empty');
+    } else if (totalHours < 0) {
+      alert('Start Time cannot be greater than finish time');
+    } else if (startTimeValidation === finishTimeValidation) {
+      alert('Start Time cannot be equal to finish time');
+    } else if (!rateDay) {
+      alert('Select a Rate Day first');
+    } else {
+      const details = {
+        rateDay,
+        date,
+        startTime,
+        finishTime,
+        location,
+        child,
+        totalHours,
+        comments,
+        totalAmount,
+      };
+      //console.log(details);
+      setTest(details);
+      setConfirmModal(true);
+    }
+  };
 
   const renderDays = ({ item, index }) => {
     return (
@@ -434,7 +411,7 @@ const Add = ({ navigation, route }) => {
                   Total amount: $
                 </Text>
                 <Text style={{ fontSize: 18 }}>
-                  {totalAmount ? totalAmount : '0.00'}
+                  {totalAmount === 'NaN' ? '0.00' : totalAmount}
                 </Text>
               </View>
             </Card>
@@ -451,7 +428,7 @@ const Add = ({ navigation, route }) => {
               style={{ width: 100, alignSelf: 'center', marginRight: 30 }}
               theme={{ colors: { primary: '#5c4b4d' } }}
               onPress={() => {
-                handleAddDay();
+                calcRate();
               }}
             >
               Save
@@ -466,14 +443,14 @@ const Add = ({ navigation, route }) => {
             >
               Check Inputs
             </Button>
-            {/* {confirmModal === true ? (
+            {confirmModal === true ? (
               <ConfirmModal
                 setModalOpen={setConfirmModal}
                 modalOpen={confirmModal}
-                items={{ data }}
-                handleDoneBtn={handleAddDay}
+                items={test}
+                handleAddDay={handleAddDay}
               />
-            ) : null} */}
+            ) : null}
           </View>
         </ScrollView>
       </SafeAreaView>

@@ -5,8 +5,8 @@ import { Button, Card } from 'react-native-paper';
 var { height } = Dimensions.get('window');
 
 const ConfirmModal = (props) => {
-  const item = props.items.data;
-  console.log(item);
+  const item = props.items;
+  //console.log(item);
 
   return (
     <View>
@@ -80,7 +80,12 @@ const ConfirmModal = (props) => {
                 mode="contained"
                 style={{ width: 100, alignSelf: 'center', marginRight: 15 }}
                 theme={{ colors: { primary: '#5c4b4d' } }}
-                onPress={() => props.handleDoneBtn()}
+                onPress={() => [
+                  props.handleAddDay(),
+                  setTimeout(() => {
+                    props.setModalOpen(false);
+                  }, 600),
+                ]}
               >
                 Done
               </Button>
