@@ -26,7 +26,7 @@ const InputsList = ({ navigation }) => {
   const [invoiceAmount, setInvoiceAmount] = useState('0');
   const [invoices, setInvoices] = useState([]);
   const [currentAmount, setCurrentAmount] = useState();
-  const [currentAmounts, setCurrentAmounts] = useState();
+
   const [invStatus, setInvStatus] = useState();
 
   const [loading, setLoading] = useState(true);
@@ -140,7 +140,7 @@ const InputsList = ({ navigation }) => {
 
           setTimeout(() => {
             navigation.navigate('Invoices');
-          }, 600),
+          }, 700),
         ])
         .catch((error) => {
           [alert('This invoice number already exists'), console.error(error)];
@@ -157,84 +157,77 @@ const InputsList = ({ navigation }) => {
   }
 
   return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        Keyboard.dismiss(0);
-      }}
-      accessible={false}
-    >
-      <View style={styles.container}>
-        <View style={styles.fieldsView}>
-          <View style={{ flexDirection: 'row', width: '100%', left: 45 }}>
-            <View style={{ marginRight: 4, alignItems: 'center' }}>
-              <Text>Invoice</Text>
-              <Text>Amount</Text>
-            </View>
-            <View style={styles.amountView}>
-              <Text style={{ fontWeight: 'bold' }}>
-                {currentAmount ? `$ ${currentAmount}` : '$ 0.00'}
-              </Text>
-            </View>
+    <View style={styles.container}>
+      <View style={styles.fieldsView}>
+        <View style={{ flexDirection: 'row', width: '100%', left: 45 }}>
+          <View style={{ marginRight: 4, alignItems: 'center' }}>
+            <Text>Invoice</Text>
+            <Text>Amount</Text>
           </View>
-          <View style={styles.invoiceNoView}>
-            <View style={{ marginRight: 4, alignItems: 'center' }}>
-              <Text>Invoice</Text>
-              <Text>No.</Text>
-            </View>
-            <TextInput
-              label="Invoice No."
-              value={invoiceNumber}
-              style={styles.input}
-              keyboardType="number-pad"
-              onChangeText={(text) => setInvoiceNumber(text)}
-            />
+          <View style={styles.amountView}>
+            <Text style={{ fontWeight: 'bold' }}>
+              {currentAmount ? `$ ${currentAmount}` : '$ 0.00'}
+            </Text>
           </View>
         </View>
-        <View style={{ marginBottom: 60, marginTop: 50 }}>
-          <FlatList
-            data={invStatus}
-            renderItem={({ item, index }) => (
-              <InpustListItem
-                day={item.rateDay}
-                start={item.startTime}
-                id={item._id}
-                index={index}
-                finish={item.finishTime}
-                child={item.child}
-                date={item.date}
-                location={item.location}
-                status={item.status}
-                amount={item.totalAmount}
-                hours={item.totalHours}
-                delete={handleRemoveRate}
-              />
-            )}
-            keyExtractor={(item) => item._id.toString()}
+        <View style={styles.invoiceNoView}>
+          <View style={{ marginRight: 4, alignItems: 'center' }}>
+            <Text>Invoice</Text>
+            <Text>No.</Text>
+          </View>
+          <TextInput
+            label="Invoice No."
+            value={invoiceNumber}
+            style={styles.input}
+            keyboardType="number-pad"
+            onChangeText={(text) => setInvoiceNumber(text)}
           />
         </View>
-
-        <View style={styles.viewBtn}>
-          <Button
-            icon="content-save"
-            mode="contained"
-            style={{ width: 190, alignSelf: 'center', marginRight: 30 }}
-            theme={{ colors: { primary: '#5c4b4d' } }}
-            onPress={() => handleCreateInvoice()}
-          >
-            Create Invoice
-          </Button>
-          <Button
-            icon="keyboard-return"
-            mode="contained"
-            style={{ width: 120, alignSelf: 'center' }}
-            theme={{ colors: { primary: '#5c4b4d' } }}
-            onPress={() => navigation.navigate('Add')}
-          >
-            Return
-          </Button>
-        </View>
       </View>
-    </TouchableWithoutFeedback>
+      <View style={{ marginBottom: 60, marginTop: 50 }}>
+        <FlatList
+          data={invStatus}
+          renderItem={({ item, index }) => (
+            <InpustListItem
+              day={item.rateDay}
+              start={item.startTime}
+              id={item._id}
+              index={index}
+              finish={item.finishTime}
+              child={item.child}
+              date={item.date}
+              location={item.location}
+              status={item.status}
+              amount={item.totalAmount}
+              hours={item.totalHours}
+              delete={handleRemoveRate}
+            />
+          )}
+          keyExtractor={(item) => item._id.toString()}
+        />
+      </View>
+
+      <View style={styles.viewBtn}>
+        <Button
+          icon="content-save"
+          mode="contained"
+          style={{ width: 190, alignSelf: 'center', marginRight: 30 }}
+          theme={{ colors: { primary: '#5c4b4d' } }}
+          onPress={() => handleCreateInvoice()}
+        >
+          Create Invoice
+        </Button>
+        <Button
+          icon="keyboard-return"
+          mode="contained"
+          style={{ width: 120, alignSelf: 'center' }}
+          theme={{ colors: { primary: '#5c4b4d' } }}
+          onPress={() => navigation.navigate('Add')}
+        >
+          Return
+        </Button>
+      </View>
+    </View>
   );
 };
 

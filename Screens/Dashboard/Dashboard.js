@@ -9,6 +9,7 @@ import axios from 'axios';
 import baseURL from '../../assets/baseURL';
 
 import moment from 'moment';
+import { backgroundColor, borderBottom, style } from 'styled-system';
 
 const Item = ({ ...props }) => {
   return (
@@ -25,6 +26,8 @@ const Dashboard = () => {
   const [rates, setRates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isRender, setIsRender] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isFocused2, setIsFocused2] = useState(false);
 
   const ratesReg = useSelector((state) => {
     return state.rateR;

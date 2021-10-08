@@ -5,6 +5,7 @@ import {
   View,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 
 import InvoicesList from './InvoicesList';
@@ -23,6 +24,7 @@ const Invoices = () => {
           invoiceNumber={item.invoiceNumber}
           invoiceDate={item.invoiceDate}
           invoiceAmount={item.invoiceAmount}
+          invoiceItems={item.invoiceItems}
           invoiceId={item._id}
         />
       </View>

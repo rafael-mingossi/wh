@@ -8,8 +8,9 @@ import {
   FlatList,
   Platform,
   Alert,
+  TextInput,
 } from 'react-native';
-import { TextInput, Button, Card } from 'react-native-paper';
+import { Button, Card } from 'react-native-paper';
 
 import { Picker } from '@react-native-picker/picker';
 
@@ -58,7 +59,11 @@ const Add = ({ navigation, route }) => {
   const [finishTimeValidation, setFinishTimeValidation] = useState('');
 
   const [data, setData] = useState([]);
-  const [test, setTest] = useState();
+  const [detailsModal, setDetailsModal] = useState();
+
+  const [isFocusedLocal, setIsFocusedLocal] = useState(false);
+  const [isFocusedChild, setIsFocusedChild] = useState(false);
+  const [isFocusedComment, setIsFocusedComment] = useState(false);
 
   const ratesReg = useSelector((state) => {
     return state.rateR;
@@ -170,7 +175,7 @@ const Add = ({ navigation, route }) => {
         totalAmount,
       };
       //console.log(details);
-      setTest(details);
+      setDetailsModal(details);
       setConfirmModal(true);
     }
   };
@@ -196,10 +201,10 @@ const Add = ({ navigation, route }) => {
   return (
     <KeyboardAwareScrollView
       viewIsInsideTabBar={true}
-      extraHeight={200}
+      extraHeight={250}
       enableOnAndroid={true}
     >
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView>
         <ScrollView contentContainerStyle={{ flex: 1, alignItems: 'center' }}>
           <View style={{ width: '100%' }}>
             {ratesReg.length >= 1 ? (
@@ -369,42 +374,58 @@ const Add = ({ navigation, route }) => {
             </View>
           </View>
 
-          <View style={{ width: '90%' }}>
+          <View
+            style={{
+              width: '90%',
+              marginTop: 10,
+              alignItems: 'center',
+            }}
+          >
             <TextInput
-              label="Location"
+              name={'location'}
+              placeholder="Location"
+              style={
+                isFocusedLocal ? styles.inputFocused : styles.inputNotFocused
+              }
               value={location}
-              mode={'outlined'}
-              style={styles.input}
-              theme={{ colors: { primary: '#5c4b4d' } }}
+              onFocus={() => setIsFocusedLocal(true)}
+              onBlur={() => setIsFocusedLocal(false)}
               onChangeText={(text) => setLocation(text)}
             />
+
             <TextInput
-              label="Child"
+              name={'child'}
+              placeholder="Child"
+              style={
+                isFocusedChild ? styles.inputFocused : styles.inputNotFocused
+              }
               value={child}
-              mode={'outlined'}
-              style={styles.input}
-              theme={{ colors: { primary: '#5c4b4d' } }}
+              onFocus={() => setIsFocusedChild(true)}
+              onBlur={() => setIsFocusedChild(false)}
               onChangeText={(text) => setChild(text)}
             />
+
             <TextInput
-              label="Total Hours"
+              name={'totalHours'}
               value={totalHours}
-              mode={'outlined'}
-              style={styles.input}
-              keyboardType="number-pad"
-              theme={{ colors: { primary: '#5c4b4d' } }}
+              placeholder="Total Hours"
+              style={styles.inputNotFocused}
+              editable={false}
+              keyboardType="numeric"
               onChangeText={(text) => setTotalHours(text)}
             />
             <TextInput
-              label="Other Comments"
+              name={'comments'}
               value={comments}
-              mode={'outlined'}
-              multiline={true}
-              numberOfLines={3}
-              style={[styles.input, { height: 60 }]}
-              theme={{ colors: { primary: '#5c4b4d' } }}
+              placeholder="Comments"
+              style={
+                isFocusedComment ? styles.inputFocused : styles.inputNotFocused
+              }
+              onFocus={() => setIsFocusedComment(true)}
+              onBlur={() => setIsFocusedComment(false)}
               onChangeText={(text) => setComments(text)}
             />
+
             <Card style={styles.myCard}>
               <View style={{ flexDirection: 'row' }}>
                 <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
@@ -447,7 +468,7 @@ const Add = ({ navigation, route }) => {
               <ConfirmModal
                 setModalOpen={setConfirmModal}
                 modalOpen={confirmModal}
-                items={test}
+                items={detailsModal}
                 handleAddDay={handleAddDay}
               />
             ) : null}
@@ -466,7 +487,7 @@ const styles = StyleSheet.create({
     height: 45,
   },
   myCard: {
-    margin: 5,
+    marginTop: 15,
     padding: 15,
     backgroundColor: '#f0eeeb',
     width: '80%',
@@ -489,5 +510,21 @@ const styles = StyleSheet.create({
     width: 95,
     borderColor: '#5c4b4d',
     height: 49,
+  },
+  inputFocused: {
+    backgroundColor: '#f2f2f2',
+    borderBottomWidth: 2,
+    borderColor: '#e3e324',
+    width: '70%',
+    height: 50,
+    fontSize: 16,
+  },
+  inputNotFocused: {
+    backgroundColor: '#f2f2f2',
+    borderBottomWidth: 1,
+    borderColor: '#5c4b4d',
+    width: '70%',
+    height: 50,
+    fontSize: 16,
   },
 });

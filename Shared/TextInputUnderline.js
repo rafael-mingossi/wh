@@ -1,9 +1,7 @@
 import React from 'react';
-import { StyleSheet, TextInput, View, Dimensions } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
-var { height, width } = Dimensions.get('window');
-
-const Input = (props) => {
+const TextInputUnderline = (props) => {
   return (
     <View>
       <TextInput
@@ -23,17 +21,21 @@ const Input = (props) => {
   );
 };
 
-export default Input;
+export default TextInputUnderline;
 
 const styles = StyleSheet.create({
-  input: {
-    width: width - 80,
-    height: 40,
-    backgroundColor: 'white',
-    margin: 10,
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 2,
-    borderColor: 'orange',
+  inputFocused: {
+    backgroundColor: '#f2f2f2',
+    borderBottomWidth: 2,
+    borderColor: '#e3e324',
+    width: '50%',
+    height: '25%',
+  },
+  inputNotFocused: {
+    backgroundColor: '#f2f2f2',
+    borderBottomWidth: 1,
+    borderColor: '#5c4b4d',
+    width: '50%',
+    height: '25%',
   },
 });

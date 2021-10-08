@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const InvoicesList = (props) => {
   var newDate = props.invoiceDate.split('T')[0];
@@ -8,6 +9,8 @@ const InvoicesList = (props) => {
   var getYear = newDate.slice(0, 4);
 
   var newDateFormatted = getDay + '-' + getMonth + '-' + getYear;
+
+  const navigation = useNavigation();
 
   return (
     <View style={styles.mainView}>
@@ -19,9 +22,13 @@ const InvoicesList = (props) => {
       <View>
         <TouchableOpacity
           style={styles.detailsBtn}
-          onPress={() => console.log('DETAILS!!')}
+          onPress={() =>
+            navigation.navigate('InvoiceDetails', {
+              invoiceDetails: props,
+            })
+          }
         >
-          <Text style={styles.detailsTxt}>Details</Text>
+          <Text style={styles.detailsTxt}>Details...</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -47,7 +54,7 @@ const styles = StyleSheet.create({
   detailsBtn: {
     borderRadius: 5,
     height: 25,
-    width: 55,
+    width: 65,
     borderWidth: 1,
     borderColor: 'black',
     backgroundColor: '#5c4b4d',

@@ -2,6 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import Invoices from '../Screens/Invoices/Invoices';
+import InvoiceDetails from '../Screens/Invoices/InvoiceDetails';
 
 const Stack = createStackNavigator();
 
@@ -13,6 +14,14 @@ function MyStack() {
         component={Invoices}
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="InvoiceDetails"
+        component={InvoiceDetails}
+        options={{
+          headerShown: false,
+          title: '',
         }}
       />
     </Stack.Navigator>

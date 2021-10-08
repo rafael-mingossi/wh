@@ -41,7 +41,12 @@ const ConfirmModal = (props) => {
                 <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
                   Comments:
                 </Text>
-                <Text style={{ fontSize: 18 }}>{item.comments}</Text>
+
+                <Text style={{ fontSize: 18 }}>
+                  {item.comments.length > 10
+                    ? item.comments.substring(0, 10 - 3) + '...'
+                    : item.comments}
+                </Text>
               </View>
               <View style={styles.viewDetails}>
                 <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
