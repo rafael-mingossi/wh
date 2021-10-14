@@ -231,7 +231,7 @@ export default function Rates({ ...props }) {
           </EasyButton>
         </View>
 
-        {ratesReg.length >= 1 ? (
+        {rates ? (
           <FlatList
             data={rates}
             renderItem={({ item, index }) => (

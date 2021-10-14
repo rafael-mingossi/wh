@@ -48,7 +48,7 @@ const InputsList = ({ navigation }) => {
           res.data.filter((filt) => filt.status === 'open').map((el) => el)
         );
         //console.log(invStatus);
-        dispatch({ type: 'ADD_DAY', payload: res.data });
+        //dispatch({ type: 'ADD_DAY', payload: res.data });
         setLoading(false);
       })
       .catch((error) => alert('Error to load inputs'));
@@ -103,7 +103,7 @@ const InputsList = ({ navigation }) => {
       .delete(`${baseURL}adds/${id}`)
       .then((res) => {
         const newList = inputs.filter((item) => item.id !== id);
-        dispatch({ type: 'ADD_DAY', payload: newList });
+        //dispatch({ type: 'ADD_DAY', payload: newList });
         setInputs(newList);
         setRequestData(new Date());
       })
@@ -126,8 +126,8 @@ const InputsList = ({ navigation }) => {
         .post(`${baseURL}invoices`, invoiceDetails)
         .then((res) => [
           setInvoices(res.data),
-          alert('invoice created'),
-          //dispatch({ type: 'ADD_RATE', payload: [...rates, res.data] }),
+          //alert('invoice created'),
+          dispatch({ type: 'GET_INVOICE', payload: res.data }),
 
           axios
             .post(`${baseURL}adds/all`)
@@ -138,9 +138,9 @@ const InputsList = ({ navigation }) => {
               console.error(error);
             }),
 
-          setTimeout(() => {
-            navigation.navigate('Invoices');
-          }, 700),
+          // setTimeout(() => {
+          //   navigation.navigate('Invoices');
+          // }, 700),
         ])
         .catch((error) => {
           [alert('This invoice number already exists'), console.error(error)];

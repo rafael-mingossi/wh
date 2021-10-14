@@ -43,6 +43,10 @@ const addSchema = mongoose.Schema({
     type: String,
     default: 'open',
   },
+  createdOn: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 exports.Add = mongoose.model('Add', addSchema);

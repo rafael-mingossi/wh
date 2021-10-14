@@ -11,6 +11,15 @@ router.get('/', async (req, res) => {
   res.status(200).send(inputsList);
 });
 
+router.get('/lastinput', async (req, res) => {
+  const lastInput = await Add.find().sort({ createdOn: -1 }).limit(1);
+
+  if (!lastInput) {
+    res.status(500).json({ success: false });
+  }
+  res.status(200).send(lastInput);
+});
+
 router.get('/invoiceids', async (req, res) => {
   const inputsList = await Add.find();
 

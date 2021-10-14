@@ -14,6 +14,18 @@ router.get('/', async (req, res) => {
   res.send(invoiceList);
 });
 
+router.get('/lastinvoice', async (req, res) => {
+  const lastInvoice = await Invoice.find()
+    .populate({ path: 'invoiceItems', populate: 'items' })
+    .sort({ invoiceDate: -1 })
+    .limit(1);
+
+  if (!lastInvoice) {
+    res.status(500).json({ success: false });
+  }
+  res.send(lastInvoice);
+});
+
 router.get('/numbers', async (req, res) => {
   const invoiceListNum = await Invoice.find()
     .sort({ invoiceDate: -1 })

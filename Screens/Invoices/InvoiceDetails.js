@@ -6,7 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Alert,
 } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -14,6 +17,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 var { height } = Dimensions.get('window');
 
 const InvoiceDetails = (props) => {
+  const [showDeleteBox, setShowDeleteBox] = useState(true);
+
+  const navigation = useNavigation();
+
   const { invoiceDetails } = props.route.params;
   //console.log(invoiceDetails);
 
@@ -23,6 +30,32 @@ const InvoiceDetails = (props) => {
   var getYear = newDate.slice(0, 4);
 
   var newDateFormatted = getDay + '-' + getMonth + '-' + getYear;
+
+  const showConfirmDialog = () => {
+    return Alert.alert(
+      'Are your sure?',
+      'Are you sure you want to remove this beautiful box?',
+      [
+        // The "Yes" button
+        {
+          text: 'Yes',
+          onPress: () => {
+            [
+              invoiceDetails.deleteInvoice(invoiceDetails.invoiceId),
+              setTimeout(() => {
+                navigation.navigate('Invoices');
+              }, 700),
+            ];
+          },
+        },
+        // The "No" button
+        // Does nothing but dismiss the dialog when tapped
+        {
+          text: 'No',
+        },
+      ]
+    );
+  };
 
   return (
     <View>
@@ -37,12 +70,13 @@ const InvoiceDetails = (props) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.btnDelete}
-            onPress={() => console.log('DELETE')}
+            onPress={() => showConfirmDialog()}
           >
             <MaterialIcons name="delete-forever" size={20} color="white" />
             <Text style={styles.txtReturnBtn}>Delete</Text>
           </TouchableOpacity>
         </View>
+        {showDeleteBox}
 
         <Text
           style={styles.txtInvoiceNum}
@@ -60,7 +94,11 @@ const InvoiceDetails = (props) => {
       <View style={styles.viewItems}>
         <Text style={styles.txtInvoiceItems}>Invoice Items: </Text>
         <View style={styles.scrollview}>
-          <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+            style={styles.viewListItems}
+          >
             {invoiceDetails.invoiceItems.map((invoiceItemDetails) => {
               //console.log(invoiceItemDetails.items[0].child);
               return invoiceItemDetails.items.map((itemDetails) => {

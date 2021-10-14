@@ -520,64 +520,152 @@ const styles = StyleSheet.create({
 //   }
 // }, [initHours, initMinutes, finishHours, finishMinutes, totalHours, rateDay]);
 
+// return (
+//   <TouchableOpacity onPress={() => setModalOpen(true)}>
+//     <View>
+//       <Text style={styles.textStyle}>{value}</Text>
+//       <Modal
+//         transparent={true}
+//         animationType="slide"
+//         visible={modalOpen}
+//         supportedOrientations={['portrait']}
+//         onRequestClose={() => setModalOpen(false)}
+//       >
+//         <View style={{ flex: 1 }}>
+//           {/* This will close the modal clicking out of it */}
+//           <TouchableOpacity
+//             onPress={() => setModalOpen(false)}
+//             style={{ flex: 1 }}
+//             activeOpacity={1}
+//             visible={modalOpen}
+//           >
+//             <TouchableHighlight
+//               underlayColor={'#FFFFFF'}
+//               style={{
+//                 flex: 1,
+//               }}
+//             >
+//               <View style={styles.touchableOp}>
+//                 <TouchableOpacity
+//                   onPress={() => setModalOpen(false)}
+//                   underlayColor={'transparent'}
+//                 >
+//                   <Text
+//                     style={{
+//                       fontWeight: 'bold',
+//                       marginLeft: 10,
+//                       fontSize: 18,
+//                     }}
+//                   >
+//                     Close
+//                   </Text>
+//                 </TouchableOpacity>
+//                 <View>
+//                   <Picker
+//                     selectedValue={value}
+//                     style={{ height: 50, width: '100%' }}
+//                     onValueChange={(itemValue, itemIndex) =>
+//                       setValue(itemValue)
+//                     }
+//                   >
+//                     {pickerData(items)}
+//                   </Picker>
+//                 </View>
+//               </View>
+//             </TouchableHighlight>
+//           </TouchableOpacity>
+//         </View>
+//       </Modal>
+//     </View>
+//   </TouchableOpacity>
+// );
+// };
 
-return (
-  <TouchableOpacity onPress={() => setModalOpen(true)}>
-    <View>
-      <Text style={styles.textStyle}>{value}</Text>
-      <Modal
-        transparent={true}
-        animationType="slide"
-        visible={modalOpen}
-        supportedOrientations={['portrait']}
-        onRequestClose={() => setModalOpen(false)}
-      >
-        <View style={{ flex: 1 }}>
-          {/* This will close the modal clicking out of it */}
-          <TouchableOpacity
-            onPress={() => setModalOpen(false)}
-            style={{ flex: 1 }}
-            activeOpacity={1}
-            visible={modalOpen}
-          >
-            <TouchableHighlight
-              underlayColor={'#FFFFFF'}
-              style={{
-                flex: 1,
-              }}
-            >
-              <View style={styles.touchableOp}>
-                <TouchableOpacity
-                  onPress={() => setModalOpen(false)}
-                  underlayColor={'transparent'}
-                >
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      marginLeft: 10,
-                      fontSize: 18,
-                    }}
-                  >
-                    Close
-                  </Text>
-                </TouchableOpacity>
-                <View>
-                  <Picker
-                    selectedValue={value}
-                    style={{ height: 50, width: '100%' }}
-                    onValueChange={(itemValue, itemIndex) =>
-                      setValue(itemValue)
-                    }
-                  >
-                    {pickerData(items)}
-                  </Picker>
-                </View>
-              </View>
-            </TouchableHighlight>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    </View>
-  </TouchableOpacity>
-);
-};
+// import React, { useRef, useState, useEffect } from 'react';
+// import { StyleSheet, Text, View } from 'react-native';
+// import { Animated } from 'react-native';
+
+// const Progress = ({ step, steps, height }) => {
+//   const [width, setWidth] = useState(0);
+//   const animatedValue = useRef(new Animated.Value(-1000)).current;
+//   const reactive = useRef(new Animated.Value(-1000)).current;
+
+//   useEffect(() => {
+//     Animated.timing(animatedValue, {
+//       toValue: reactive,
+//       duration: 500,
+//       useNativeDriver: true,
+//     }).start();
+//   }, []);
+
+//   useEffect(() => {
+//     reactive.setValue(-width + (width * step) / steps);
+//   }, [step, width]);
+
+//   return (
+//     <>
+//       <Text>
+//         {step}/{steps}
+//       </Text>
+//       <View
+//         onLayout={(e) => {
+//           const newWidth = e.nativeEvent.layout.width;
+//           setWidth(newWidth);
+//         }}
+//         style={{
+//           height,
+//           backgroundColor: 'black',
+//           borderRadius: height,
+//           overflow: 'hidden',
+//         }}
+//       >
+//         <Animated.View
+//           style={{
+//             height,
+//             width: '100%',
+//             backgroundColor: '#ffcc00',
+//             borderRadius: height,
+//             overflow: 'hidden',
+//             position: 'absolute',
+//             left: 0,
+//             top: 0,
+//             transform: [
+//               {
+//                 translateX: animatedValue,
+//               },
+//             ],
+//           }}
+//         />
+//       </View>
+//     </>
+//   );
+// };
+
+// const Chart = () => {
+//   const [index, setIndex] = useState(0);
+
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setIndex((index + 1) % (10 + 1));
+//     }, 1000);
+
+//     return () => {
+//       clearInterval(interval);
+//     };
+//   }, [index]);
+
+//   return (
+//     <View style={styles.chart}>
+//       <Progress step={8} steps={10} height={20} />
+//     </View>
+//   );
+// };
+
+// export default Chart;
+
+// const styles = StyleSheet.create({
+//   chart: {
+//     justifyContent: 'center',
+//     padding: 20,
+//   },
+// });
