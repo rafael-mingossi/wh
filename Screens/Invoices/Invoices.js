@@ -101,7 +101,9 @@ const Invoices = ({ navigation }) => {
           <ActivityIndicator size="large" color="red" />
         </View>
       ) : invoices.length == 0 ? (
-        <Text>You don't have any invoices created</Text>
+        <Text style={{ textAlign: 'center', marginTop: 30 }}>
+          You don't have any invoices created!
+        </Text>
       ) : (
         <FlatList
           data={invoices}

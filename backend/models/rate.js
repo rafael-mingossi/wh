@@ -9,6 +9,10 @@ const rateSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
 exports.Rate = mongoose.model('Rate', rateSchema);

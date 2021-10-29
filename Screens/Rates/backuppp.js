@@ -669,3 +669,128 @@ const styles = StyleSheet.create({
 //     padding: 20,
 //   },
 // });
+
+// useEffect(() => {
+//   dispatch(getTokens());
+// }, []);
+
+// useFocusEffect(
+//   useCallback(() => {
+//     if (
+//       context.stateUser.isAuthenticated === false ||
+//       context.stateUser.isAuthenticated === null
+//     ) {
+//       navigation.navigate('Login');
+//     }
+
+//     const getToken = async () => {
+//       try {
+//         await AsyncStorage.getItem('jwt')
+//           .then((res) => {
+//             if (loadingAuth) {
+//               setToken(res);
+//               //console.log(res);
+//               axios
+//                 .get(`${baseURL}users/${context.stateUser.user.userId}`, {
+//                   headers: {
+//                     'Content-Type': 'application/json',
+//                     Authorization: `Bearer ${res}`,
+//                   },
+//                 })
+//                 .then((user) => setUserName(user.data))
+//                 .catch((error) => console.log(error));
+//             }
+//           })
+//           .catch((error) => console.log(error));
+//       } catch (e) {
+//         console.log(`tryCatch Token: ${e}`);
+//       }
+//     };
+
+//     getToken();
+
+//     return () => {
+//       setUserName();
+//       setToken();
+//       setLoadingAuth(false);
+//     };
+//   }, [context.stateUser.isAuthenticated])
+// );
+
+// useEffect(() => {
+//   navigation.addListener('focus', async () => {
+//     try {
+//       await axios
+//         .get(`${baseURL}invoices/lastinvoice`)
+//         .then((res) => {
+//           if (isMounted.current) {
+//             setLastInvoices(res.data);
+//           }
+//         })
+//         .catch((error) => console.log(`Load Invoices: ${error}`));
+
+//       //get Last Input
+//       await axios
+//         .get(`${baseURL}adds/lastinput`)
+//         .then((res) => {
+//           if (isMounted.current) {
+//             setLastInput(res.data);
+//           }
+//         })
+//         .catch((error) => console.log(`Load Inputs: ${error}`));
+//       //setLoadingInvoices(false);
+//     } catch (e) {
+//       console.log(`tryCatch InputInvoice: ${e}`);
+//     }
+
+//     return () => {
+//       setLastInvoices([]);
+//       setLastInput([]);
+//     };
+//   });
+// }, [navigation]);
+
+// useEffect(() => {
+//   navigation.addListener('focus', async () => {
+//     try {
+//       //get Inputs
+//       await axios
+//         .get(`${baseURL}adds`)
+//         .then((res) => {
+//           if (isMounted.current) {
+//             const sundayValues = res.data
+//               .filter((filt) => filt.rateDay === 'Sunday')
+//               .map((el) => el.totalAmount);
+//             setInputsSunday(sundayValues.reduce((a, b) => a + b, 0));
+
+//             const saturdayValues = res.data
+//               .filter((filt) => filt.rateDay === 'Saturday')
+//               .map((el) => el.totalAmount);
+//             setInputsSaturday(saturdayValues.reduce((a, b) => a + b, 0));
+
+//             const weekdayValues = res.data
+//               .filter((filt) => filt.rateDay === 'Weekday')
+//               .map((el) => el.totalAmount);
+//             setInputsWeekDay(weekdayValues.reduce((a, b) => a + b, 0));
+
+//             const publicHolidayValues = res.data
+//               .filter((filt) => filt.rateDay === 'Public Holiday')
+//               .map((el) => el.totalAmount);
+//             setInputsPublicHoliday(
+//               publicHolidayValues.reduce((a, b) => a + b, 0)
+//             );
+//           }
+//         })
+//         .catch((error) => alert('Error to load chart details'));
+//     } catch (e) {
+//       console.log(`tryCatch Chart: ${e}`);
+//     }
+
+//     return () => {
+//       setInputsSunday();
+//       setInputsSaturday();
+//       setInputsWeekDay();
+//       setInputsPublicHoliday();
+//     };
+//   });
+// }, [navigation]);

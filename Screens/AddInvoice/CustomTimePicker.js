@@ -41,13 +41,27 @@ const CustomTimePicker = ({
         onRequestClose={() => setModalOpen(false)}
       >
         {/* This will close the modal clicking out of it */}
-
         <TouchableOpacity
           onPressOut={() => setModalOpen(false)}
           style={{ flex: 1 }}
           activeOpacity={1}
           visible={modalOpen}
         >
+          <View style={{ marginTop: 505 }}>
+            <TouchableOpacity onPress={() => setModalOpen(false)}>
+              <Text
+                style={{
+                  backgroundColor: '#5c4b4d',
+                  fontSize: 18,
+                  textAlign: 'center',
+                  color: 'white',
+                  fontWeight: 'bold',
+                }}
+              >
+                Done
+              </Text>
+            </TouchableOpacity>
+          </View>
           <TouchableWithoutFeedback>
             <View style={styles.touchableOp}>
               <Picker
@@ -88,5 +102,30 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     width: 70,
     backgroundColor: '#f7f7f7',
+  },
+  viewDoneBtn: {
+    alignSelf: 'flex-end',
+    marginRight: 20,
+    marginTop: 520,
+  },
+  btnTextL: {
+    position: 'absolute',
+    top: 0,
+    height: 42,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    left: 0,
+  },
+  btnTextR: {
+    position: 'absolute',
+    top: 0,
+    height: 42,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 0,
   },
 });

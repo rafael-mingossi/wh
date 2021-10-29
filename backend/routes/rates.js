@@ -24,6 +24,7 @@ router.post(`/`, async (req, res) => {
   let rate = new Rate({
     day: req.body.day,
     value: req.body.value,
+    user: req.body.user,
   });
 
   rate = await rate.save(); //this will save/create a new categr=ory

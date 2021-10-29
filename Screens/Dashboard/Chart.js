@@ -26,7 +26,11 @@ const Chart = (props) => {
   return (
     <View style={styles.chart}>
       <View>
-        <Text style={{ marginLeft: 10, textAlign: 'left' }}>{props.label}</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text style={{ marginLeft: 15 }}>{props.label}</Text>
+          <Text style={{ marginRight: 10 }}>${props.step}</Text>
+        </View>
+
         {/* style={{ borderLeftWidth: 2, borderBottomWidth: 2, height: 300 }} */}
         <View
           onLayout={(e) => {
@@ -41,16 +45,6 @@ const Chart = (props) => {
             marginLeft: 10,
           }}
         >
-          <Text
-            style={{
-              marginRight: 10,
-              textAlign: 'right',
-              color: 'white',
-              justifyContent: 'center',
-            }}
-          >
-            ${props.step}
-          </Text>
           <Animated.View
             style={{
               height,

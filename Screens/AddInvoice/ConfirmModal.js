@@ -116,26 +116,27 @@ export default ConfirmModal;
 const styles = StyleSheet.create({
   myCard: {
     margin: 5,
-    padding: 15,
+    marginTop: 5,
+    padding: 5,
     backgroundColor: '#f0eeeb',
     width: '95%',
     alignItems: 'center',
-    alignSelf: 'center',
-    marginBottom: 20,
-
-    flex: 1,
+    marginBottom: 30,
+    height: '80%',
   },
   centeredView: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 22,
-    flex: 1,
+    position: 'absolute',
+    top: height / 4.4,
+    width: '95%',
+    alignSelf: 'center',
   },
   modalView: {
     margin: 5,
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 25,
+    padding: 10,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -145,11 +146,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    height: height / 1.5,
+    height: 500,
     width: '90%',
   },
   viewDetails: {
     flexDirection: 'row',
     padding: 5,
+    alignSelf: 'center',
+    marginTop: 5,
   },
 });

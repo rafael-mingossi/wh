@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useContext,
+  useRef,
+} from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,102 +14,190 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { useSelector, useDispatch } from 'react-redux';
 
 import axios from 'axios';
 import baseURL from '../../assets/baseURL';
+import AuthGlobal from '../../Context/store/AuthGlobal';
+import { logoutUser } from '../../Context/actions/Auth.actions';
+
+import { getTokens } from '../../Redux/Actions/tokenActions';
 
 import Chart from './Chart';
 
 var { height, width } = Dimensions.get('window');
 
+//function to fix 'Warning: Can't perform a React state update on an unmounted component.'
+export function useIsMounted() {
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => (isMounted.current = false);
+  }, []);
+
+  return isMounted;
+}
+
 const Dashboard = ({ navigation }) => {
-  const [loading, setLoading] = useState(false);
-  const [loadingInputs, setLoadingInputs] = useState(false);
+  const context = useContext(AuthGlobal);
+  const { tokens } = useSelector((state) => state.tokenR);
+  const dispatch = useDispatch();
+
+  const isMounted = useIsMounted();
+
   const [lastInvoices, setLastInvoices] = useState([]);
   const [lastInput, setLastInput] = useState([]);
   const [inputsSunday, setInputsSunday] = useState();
   const [inputsSaturday, setInputsSaturday] = useState();
   const [inputsWeekDay, setInputsWeekDay] = useState();
   const [inputsPublicHoliday, setInputsPublicHoliday] = useState();
+  const [userName, setUserName] = useState();
 
-  const dispatch = useDispatch();
+  //console.log(lastInput);
 
-  //console.log(lastInvoices);
+  useEffect(() => {
+    dispatch(getTokens());
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (
+        context.stateUser.isAuthenticated === false ||
+        context.stateUser.isAuthenticated === null
+      ) {
+        navigation.navigate('Login');
+      }
+
+      const getToken = async () => {
+        try {
+          if (context.stateUser.user.userId) {
+            await axios
+              .get(`${baseURL}users/${context.stateUser.user.userId}`)
+              .then((user) => {
+                if (isMounted.current) {
+                  setUserName(user.data);
+                }
+              })
+              .catch((error) => console.log(error));
+          }
+        } catch (e) {
+          console.log(`tryCatch Token: ${e}`);
+        }
+      };
+
+      getToken();
+
+      return () => {
+        setUserName();
+      };
+    }, [context.stateUser.isAuthenticated])
+  );
+
+  useEffect(() => {
+    dispatch(getTokens());
+  }, []);
 
   useEffect(() => {
     navigation.addListener('focus', async () => {
-      await axios
-        .get(`${baseURL}invoices/lastinvoice`)
-        .then((res) => {
-          setLastInvoices(res.data);
-        })
-        .catch((error) => alert('Error to load Invoices'));
+      try {
+        await axios
+          .get(`${baseURL}invoices/lastinvoice`)
+          .then((res) => {
+            if (isMounted.current) {
+              const data = res.data;
 
-      //get Last Input
-      await axios
-        .get(`${baseURL}adds/lastinput`)
-        .then((res) => {
-          setLastInput(res.data);
-        })
-        .catch((error) => alert('Error to load Invoices'));
-    });
+              //filter by current user
+              const userInvoices = data.filter(
+                (invoice) => invoice.user === context.stateUser.user.userId
+              );
+              setLastInvoices(userInvoices);
+            }
+          })
+          .catch((error) => console.log(`Load Invoices: ${error}`));
 
-    return () => {
-      setLastInvoices();
-      setLastInput();
-    };
-  }, [navigation]);
+        //get Last Input
+        await axios
+          .get(`${baseURL}adds/lastinput`)
+          .then((res) => {
+            if (isMounted.current) {
+              const data = res.data;
 
-  useEffect(() => {
-    navigation.addListener('focus', () => {
-      setLoadingInputs(true);
-      //get Inputs
-      axios
-        .get(`${baseURL}adds`)
-        .then((res) => {
-          const sundayValues = res.data
-            .filter((filt) => filt.rateDay === 'Sunday')
-            .map((el) => el.totalAmount);
-          setInputsSunday(sundayValues.reduce((a, b) => a + b, 0));
-
-          const saturdayValues = res.data
-            .filter((filt) => filt.rateDay === 'Saturday')
-            .map((el) => el.totalAmount);
-          setInputsSaturday(saturdayValues.reduce((a, b) => a + b, 0));
-
-          const weekdayValues = res.data
-            .filter((filt) => filt.rateDay === 'Weekday')
-            .map((el) => el.totalAmount);
-          setInputsWeekDay(weekdayValues.reduce((a, b) => a + b, 0));
-
-          const publicHolidayValues = res.data
-            .filter((filt) => filt.rateDay === 'Public Holiday')
-            .map((el) => el.totalAmount);
-          setInputsPublicHoliday(
-            publicHolidayValues.reduce((a, b) => a + b, 0)
-          );
-
-          //console.log(inputsSunday);
-          //dispatch({ type: 'ADD_DAY', payload: res.data });
-          setLoadingInputs(false);
-        })
-        .catch((error) => alert('Error to load inputs'));
+              //filter by current user
+              const userInputs = data.filter(
+                (invoice) => invoice.user === context.stateUser.user.userId
+              );
+              //console.log(userInputs[0]);
+              setLastInput([userInputs[0]]);
+            }
+          })
+          .catch((error) => console.log(`Load Inputs: ${error}`));
+        //setLoadingInvoices(false);
+      } catch (e) {
+        console.log(`tryCatch InputInvoice: ${e}`);
+      }
 
       return () => {
-        setInputsSunday();
-        //setAllInputs();
+        setLastInvoices([]);
+        setLastInput([]);
       };
     });
   }, [navigation]);
 
-  if (loading) {
-    return (
-      <View style={styles.spinner}>
-        <ActivityIndicator size="large" color="red" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    navigation.addListener('focus', async () => {
+      try {
+        //get Inputs
+        await axios
+          .get(`${baseURL}adds`)
+          .then((res) => {
+            if (isMounted.current) {
+              const data = res.data;
+
+              //filter by current user
+              const graphInputs = data.filter(
+                (invoice) => invoice.user === context.stateUser.user.userId
+              );
+
+              const sundayValues = graphInputs
+                .filter((filt) => filt.rateDay === 'Sunday')
+                .map((el) => el.totalAmount);
+              setInputsSunday(sundayValues.reduce((a, b) => a + b, 0));
+
+              const saturdayValues = graphInputs
+                .filter((filt) => filt.rateDay === 'Saturday')
+                .map((el) => el.totalAmount);
+              setInputsSaturday(saturdayValues.reduce((a, b) => a + b, 0));
+
+              const weekdayValues = graphInputs
+                .filter((filt) => filt.rateDay === 'Weekday')
+                .map((el) => el.totalAmount);
+              setInputsWeekDay(weekdayValues.reduce((a, b) => a + b, 0));
+
+              const publicHolidayValues = graphInputs
+                .filter((filt) => filt.rateDay === 'Public Holiday')
+                .map((el) => el.totalAmount);
+              setInputsPublicHoliday(
+                publicHolidayValues.reduce((a, b) => a + b, 0)
+              );
+            }
+          })
+          .catch((error) => alert('Error to load chart details'));
+      } catch (e) {
+        console.log(`tryCatch Chart: ${e}`);
+      }
+
+      return () => {
+        setInputsSunday();
+        setInputsSaturday();
+        setInputsWeekDay();
+        setInputsPublicHoliday();
+      };
+    });
+  }, [navigation]);
 
   return (
     <View style={{ backgroundColor: 'white', height: height }}>
@@ -115,14 +209,16 @@ const Dashboard = ({ navigation }) => {
         >
           <View>
             <View style={styles.viewWelcome}>
-              <Text style={styles.txtWelcome}>Hello Rafael</Text>
+              <Text style={styles.txtWelcome}>
+                Hello {userName ? userName.firstName : null}
+              </Text>
             </View>
             <View style={styles.rightYellowBar} />
             <View style={styles.leftYellowBar} />
           </View>
           <View style={styles.viewLastInvoice}>
             <Text style={styles.txtLastInvoice}>Last Invoice</Text>
-            {lastInvoices.length === 0 ? (
+            {lastInvoices.length == 0 ? (
               <Text style={{ textAlign: 'center', marginTop: 25 }}>
                 You have no Invoices created
               </Text>
@@ -152,7 +248,7 @@ const Dashboard = ({ navigation }) => {
           </View>
           <View style={styles.viewLastDay}>
             <Text style={styles.txtLastInvoice}>Last Input</Text>
-            {lastInput.length === 0 ? (
+            {lastInput.length == 0 ? (
               <Text style={{ textAlign: 'center', marginTop: 30 }}>
                 You have no Inputs added
               </Text>

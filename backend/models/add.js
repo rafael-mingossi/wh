@@ -43,6 +43,10 @@ const addSchema = mongoose.Schema({
     type: String,
     default: 'open',
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   createdOn: {
     type: Date,
     default: Date.now,

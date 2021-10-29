@@ -3,7 +3,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import Add from '../Screens/AddInvoice/Add';
 import InputsList from '../Screens/AddInvoice/InputsList';
-import AddListNavigator from './AddListNavigator';
 
 const Stack = createStackNavigator();
 

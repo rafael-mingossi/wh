@@ -34,7 +34,7 @@ router.get('/numbers', async (req, res) => {
     return val.invoiceNumber;
   });
 
-  //console.log(invNum);
+  //console.log(invoiceListNum);
 
   if (!invNum) {
     res.status(500).json({ success: false });
@@ -104,6 +104,7 @@ router.post('/', async (req, res) => {
           invoiceNumber: req.body.invoiceNumber,
           invoiceAmount: totalAmount,
           invoiceDate: req.body.invoiceDate,
+          user: req.body.user,
         });
 
         invoice = await invoice.save();

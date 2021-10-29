@@ -89,7 +89,6 @@ const CustomDatePicker = (props) => {
                     borderTopColor: '#E9E9E9',
                     borderTopWidth: 1,
                   }}
-                  onPress={() => console.log('datepicker clicked')}
                 >
                   <View
                     style={{

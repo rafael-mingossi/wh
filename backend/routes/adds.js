@@ -12,7 +12,8 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/lastinput', async (req, res) => {
-  const lastInput = await Add.find().sort({ createdOn: -1 }).limit(1);
+  const lastInput = await Add.find().sort({ createdOn: -1 });
+  //.limit(1);
 
   if (!lastInput) {
     res.status(500).json({ success: false });
@@ -44,14 +45,15 @@ router.get('/amounts', async (req, res) => {
     .filter((filt) => filt.status === 'open')
     .map((el) => el);
 
-  const arr = filterOpen.map((value) => value.totalAmount);
+  //console.log(filterOpen);
+  //const arr = filterOpen.map((value) => value.totalAmount);
 
   //console.log(arr);
 
-  if (!arr) {
+  if (!filterOpen) {
     res.status(500).json({ success: false });
   }
-  res.status(200).send(arr);
+  res.status(200).send(filterOpen);
 });
 
 router.get('/:id', async (req, res) => {
@@ -74,6 +76,7 @@ router.post('/', async (req, res) => {
     totalHours: req.body.totalHours,
     totalAmount: req.body.totalAmount,
     comments: req.body.comments,
+    user: req.body.user,
   });
 
   inputs = await inputs.save();
@@ -97,6 +100,7 @@ router.put('/update', (req, res) => {
     totalHours: req.body.totalHours,
     totalAmount: req.body.totalAmount,
     comments: req.body.comments,
+    user: req.body.user,
   })
     .then((data) => {
       res.send(data);

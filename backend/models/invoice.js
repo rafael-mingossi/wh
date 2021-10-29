@@ -14,6 +14,10 @@ const invoiceSchema = mongoose.Schema({
   invoiceAmount: {
     type: Number,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   invoiceDate: {
     type: Date,
     default: Date.now,

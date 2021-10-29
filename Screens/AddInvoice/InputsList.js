@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -16,8 +16,10 @@ import { Button, Card, RadioButton } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import baseURL from '../../assets/baseURL';
+import AuthGlobal from '../../Context/store/AuthGlobal';
 
 const InputsList = ({ navigation }) => {
+  const context = useContext(AuthGlobal);
   const [inputs, setInputs] = useState([]);
   const [requestData, setRequestData] = useState(new Date());
 
@@ -37,21 +39,40 @@ const InputsList = ({ navigation }) => {
     return state.inputR;
   });
 
+  //console.log(context.stateUser.user.sub);
+
   useEffect(() => {
     //get Inputs
-    axios
-      .get(`${baseURL}adds`)
-      .then((res) => {
-        setInputs(res.data);
-        //this will get only the inputs with status 'open'
-        setInvStatus(
-          res.data.filter((filt) => filt.status === 'open').map((el) => el)
-        );
-        //console.log(invStatus);
-        //dispatch({ type: 'ADD_DAY', payload: res.data });
-        setLoading(false);
-      })
-      .catch((error) => alert('Error to load inputs'));
+    try {
+      if (context.stateUser.user.userId) {
+        axios
+          .get(`${baseURL}adds`)
+          .then((res) => {
+            if (res) {
+              const data = res.data;
+              //console.log(res.data);
+              //filter by current user
+              const userInputs = data.filter(
+                (invoice) => invoice.user === context.stateUser.user.userId
+              );
+              //console.log(userInputs);
+              setInputs(userInputs);
+              //this will get only the inputs with status 'open'
+              setInvStatus(
+                userInputs
+                  .filter((filt) => filt.status === 'open')
+                  .map((el) => el)
+              );
+              //console.log(invStatus);
+              //dispatch({ type: 'ADD_DAY', payload: res.data });
+              setLoading(false);
+            }
+          })
+          .catch((error) => alert('Error to load inputs'));
+      }
+    } catch (e) {
+      console.log(e);
+    }
 
     return () => {
       setInputs();
@@ -59,37 +80,72 @@ const InputsList = ({ navigation }) => {
   }, [requestData, invoices]);
 
   useEffect(() => {
-    //get IDs
-    axios
-      .get(`${baseURL}adds/invoiceids`)
-      .then((res) => {
-        setInvoiceItems([{ items: res.data }]);
-        //console.log(res.data);
-      })
-      .catch((error) => alert('Error to load inputs'));
+    try {
+      if (context.stateUser.user.userId) {
+        //get IDs
+        axios
+          .get(`${baseURL}adds/invoiceids`)
+          .then((res) => {
+            if (res) {
+              const data = res.data;
+              //console.log(res.data);
+              //filter by current user
+              const userInputs = data.filter(
+                (invoice) => invoice.user === context.stateUser.user.userId
+              );
+              setInvoiceItems([{ items: userInputs }]);
+            }
 
-    //get total amounts
-    axios
-      .get(`${baseURL}adds/amounts`)
-      .then(async (res) => {
-        //console.log(res.data);
-        const totalAmount = await res.data.reduce((a, b) => a + b, 0);
-        setCurrentAmount(totalAmount);
-      })
-      .catch((error) => console.error(error));
+            //console.log(res.data);
+          })
+          .catch((error) => alert('Error to load inputs'));
 
-    //get invoice Number
-    axios
-      .get(`${baseURL}invoices/numbers`)
-      .then((res) => {
-        if (res.data.length <= 0) {
-          setInvoiceNumber('1');
-        } else {
-          setInvoiceNumber((res.data[0] + 1).toString());
-        }
-        //console.log(res.data[0]);
-      })
-      .catch((error) => alert('Error to load invoice numbers'));
+        //get total amounts
+        axios
+          .get(`${baseURL}adds/amounts`)
+          .then((res) => {
+            if (res) {
+              const data = res.data;
+
+              //filter by current user
+              const userInputs = data.filter(
+                (invoice) => invoice.user === context.stateUser.user.userId
+              );
+
+              const arr = userInputs.map((value) => value.totalAmount);
+              if (arr) {
+                const totalAmount = arr.reduce((a, b) => a + b, 0);
+                setCurrentAmount(totalAmount);
+              }
+            }
+          })
+          .catch((error) => console.error(error));
+
+        //get invoice Number
+        axios
+          .get(`${baseURL}invoices/numbers`)
+          .then((res) => {
+            if (res) {
+              const data = res.data;
+              //console.log(data);
+              //filter by current user
+              const userInputs = data.filter(
+                (invoice) => invoice.user === context.stateUser.user.userId
+              );
+              if (userInputs.length <= 0) {
+                setInvoiceNumber('1');
+              } else {
+                setInvoiceNumber((userInputs[0] + 1).toString());
+              }
+            }
+
+            //console.log(res.data[0]);
+          })
+          .catch((error) => alert('Error to load invoice numbers'));
+      }
+    } catch (error) {
+      console.log(error);
+    }
 
     return () => {
       setInvoiceItems();
