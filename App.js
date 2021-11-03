@@ -9,11 +9,9 @@ import store from './Redux/store';
 //Context API
 import Auth from './Context/store/Auth';
 
-//Navigators
-import UserNavigator from './Navigators/UserNavigator';
-
 //Screens
 import Header from './Shared/Header';
+import UserNavigator from './Navigators/UserNavigator';
 
 export default function App() {
   return (

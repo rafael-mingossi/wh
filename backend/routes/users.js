@@ -40,7 +40,9 @@ router.post(`/`, async (req, res) => {
     lastName: req.body.lastName,
     isAdmin: req.body.isAdmin,
   });
-  user = await user.save();
+  user = await user.save().catch((err) => {
+    console.log(err);
+  });
 
   if (!user) {
     return res.status(400).send('The user cannot be created');

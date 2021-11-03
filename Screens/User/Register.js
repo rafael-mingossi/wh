@@ -10,6 +10,10 @@ import {
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 
+import axios from 'axios';
+import baseUrl from '../../assets/baseURL';
+import Toast from 'react-native-toast-message';
+
 const Register = () => {
   const navigation = useNavigation();
 
@@ -22,6 +26,55 @@ const Register = () => {
   const [password, setPassword] = useState();
   const [registerFirstName, setRegisterFirstName] = useState();
   const [registerLastName, setRegisterLastName] = useState();
+
+  const handleUserRegister = () => {
+    if (
+      user === '' ||
+      password === '' ||
+      registerFirstName === '' ||
+      registerLastName === ''
+    ) {
+      Toast.show({
+        topOffset: 60,
+        type: 'error',
+        text1: 'Fields cannot be empty',
+        text2: 'Please try again',
+      });
+    }
+
+    let users = {
+      firstName: registerFirstName,
+      email: user,
+      password: password,
+      lastName: registerLastName,
+      isAdmin: false,
+    };
+
+    axios
+      .post(`${baseUrl}users/register`, users)
+      .then((res) => {
+        if (res.status == 200) {
+          Toast.show({
+            topOffset: 60,
+            type: 'success',
+            text1: 'Registration Succeded',
+            text2: 'Please login to continue',
+          });
+
+          setTimeout(() => {
+            navigation.navigate('Login');
+          }, 500);
+        }
+      })
+      .catch((error) => {
+        Toast.show({
+          topOffset: 60,
+          type: 'error',
+          text1: 'Something went wrong',
+          text2: 'Please try again',
+        });
+      });
+  };
 
   return (
     <KeyboardAwareScrollView
@@ -86,7 +139,10 @@ const Register = () => {
           </TouchableOpacity>
         </View>
         <View>
-          <TouchableOpacity style={styles.viewBtnLogin}>
+          <TouchableOpacity
+            style={styles.viewBtnLogin}
+            onPress={() => handleUserRegister()}
+          >
             <Text style={styles.txtBtnLogin}>Sign Up</Text>
           </TouchableOpacity>
         </View>

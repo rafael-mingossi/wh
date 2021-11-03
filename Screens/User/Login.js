@@ -29,6 +29,8 @@ const Login = () => {
     }
   }, [context.stateUser.isAuthenticated]);
 
+  //console.log(tokens);
+
   const handleSubmit = () => {
     const userLogin = {
       email,

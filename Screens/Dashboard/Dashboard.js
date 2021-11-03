@@ -255,17 +255,25 @@ const Dashboard = ({ navigation }) => {
             ) : (
               <>
                 {lastInput.map((inputDetails) => {
-                  return (
-                    <View
-                      key={inputDetails._id}
-                      style={styles.viewLastInvoiceDetails}
-                    >
-                      <Text>{`Hours: ${inputDetails.totalHours}`}</Text>
-                      <Text>{`Amount: $${inputDetails.totalAmount}`}</Text>
-                      <Text>{`Date: ${inputDetails.date}`}</Text>
-                      <Text>{`Child: ${inputDetails.child}`}</Text>
-                    </View>
-                  );
+                  if (inputDetails) {
+                    return (
+                      <View
+                        key={inputDetails._id}
+                        style={styles.viewLastInvoiceDetails}
+                      >
+                        <Text>{`Hours: ${inputDetails.totalHours}`}</Text>
+                        <Text>{`Amount: $${inputDetails.totalAmount}`}</Text>
+                        <Text>{`Date: ${inputDetails.date}`}</Text>
+                        <Text>{`Child: ${inputDetails.child}`}</Text>
+                      </View>
+                    );
+                  } else {
+                    return (
+                      <Text style={{ textAlign: 'center', marginTop: 30 }}>
+                        You have no Inputs added
+                      </Text>
+                    );
+                  }
                 })}
               </>
             )}
