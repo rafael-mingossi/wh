@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,6 +9,10 @@ import {
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { CredentialsContext } from '../../Shared/CredentialsContext';
 
 import axios from 'axios';
 import baseUrl from '../../assets/baseURL';
@@ -26,6 +30,10 @@ const Register = () => {
   const [password, setPassword] = useState();
   const [registerFirstName, setRegisterFirstName] = useState();
   const [registerLastName, setRegisterLastName] = useState();
+
+  //context
+  const { storedCredentials, setStoredCredentials } =
+    useContext(CredentialsContext);
 
   const handleUserRegister = () => {
     if (
@@ -60,10 +68,7 @@ const Register = () => {
             text1: 'Registration Succeded',
             text2: 'Please login to continue',
           });
-
-          setTimeout(() => {
-            navigation.navigate('Login');
-          }, 500);
+          persistLogin(res.data);
         }
       })
       .catch((error) => {
@@ -74,6 +79,14 @@ const Register = () => {
           text2: 'Please try again',
         });
       });
+  };
+
+  const persistLogin = (credentials) => {
+    AsyncStorage.setItem('userCredentials', JSON.stringify(credentials))
+      .then(() => {
+        setStoredCredentials(credentials);
+      })
+      .catch((err) => console.log(err));
   };
 
   return (

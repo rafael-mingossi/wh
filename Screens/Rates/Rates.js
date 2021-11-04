@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -16,9 +16,9 @@ import {
 
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-import AuthGlobal from '../../Context/store/AuthGlobal';
+
+import { CredentialsContext } from '../../Shared/CredentialsContext';
 
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -27,24 +27,17 @@ import RatesItem from './RatesItem';
 
 import axios from 'axios';
 import baseURL from '../../assets/baseURL';
-import { alignItems } from 'styled-system';
 
 var { width } = Dimensions.get('window');
 
-export default function Rates({ ...props }) {
-  const context = useContext(AuthGlobal);
-
-  const [token, setToken] = useState();
-  const [userId, setUserId] = useState();
+export default function Rates() {
   const [day, setDay] = useState('Saturday');
   const [value, setValue] = useState('');
-  const [rates, setRates] = useState([]);
-  const [ratesLoading, setRatesLoading] = useState(true);
+  const [rates, setRates] = useState();
 
   const [modalOpen, setModalOpen] = useState(false);
-
-  const [requestData, setRequestData] = useState(new Date());
   const [isRender, setIsRender] = useState(false);
+  const [requestData, setRequestData] = useState(new Date());
 
   const dispatch = useDispatch();
 
@@ -52,7 +45,13 @@ export default function Rates({ ...props }) {
     return state.rateR;
   });
 
-  //console.log(userId);
+  //console.log(rates);
+
+  //context
+  const { storedCredentials, setStoredCredentials } =
+    useContext(CredentialsContext);
+  const { token, userId } = storedCredentials;
+  //console.log(rates);
 
   const days = [
     { name: 'Saturday', id: '1' },
@@ -62,60 +61,27 @@ export default function Rates({ ...props }) {
   ];
 
   useEffect(() => {
-    const getToken = async () => {
-      try {
-        await AsyncStorage.getItem('jwt')
-          .then((res) => {
-            //console.log(res);
-            if (ratesLoading) {
-              setToken(res);
-              axios
-                .get(`${baseURL}users/${context.stateUser.user.userId}`, {
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${res}`,
-                  },
-                })
-                .then((user) => setUserId(user.data));
+    try {
+      axios
+        .get(`${baseURL}rates`)
+        .then((res) => {
+          if (userId) {
+            const data = res.data;
 
-              const validToken = {
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${res}`,
-                },
-              };
-
-              axios
-                .get(`${baseURL}rates`, validToken)
-                .then((res) => {
-                  setRates(res.data);
-                  dispatch({ type: 'ADD_RATE', payload: res.data });
-
-                  //console.log(res.data);
-                })
-                .catch((error) => {
-                  Toast.show({
-                    topOffset: 60,
-                    type: 'error',
-                    text1: 'Rates not loaded',
-                    text2: '',
-                  });
-                  //console.log(error);
-                });
-            }
-          })
-          .catch((error) => console.log(error));
-      } catch (err) {
-        console.log(e);
-      }
-    };
-
-    getToken();
+            //filter by current user
+            const userInputs = data.filter(
+              (invoice) => invoice.user === userId
+            );
+            setRates(userInputs);
+          }
+        })
+        .catch((error) => console.log(`Error loading rates: ${error}`));
+    } catch (err) {
+      console.log(err);
+    }
 
     return () => {
       setRates();
-      setToken();
-      setRatesLoading(false);
     };
   }, [requestData]);
 
@@ -126,7 +92,7 @@ export default function Rates({ ...props }) {
       let ratess = {
         day: day,
         value: value,
-        user: userId._id,
+        user: userId,
       };
 
       const validToken = {
@@ -175,9 +141,7 @@ export default function Rates({ ...props }) {
         //const newRates = rates.splice(index, 1);
         dispatch({ type: 'ADD_RATE', payload: newRates });
         setRates(newRates);
-        //console.log(newRates);
         setRequestData(new Date());
-        //return [...rates];
         setIsRender(true);
       })
       .catch((error) => {

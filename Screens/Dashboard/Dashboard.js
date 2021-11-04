@@ -1,30 +1,18 @@
-import React, {
-  useEffect,
-  useCallback,
-  useState,
-  useContext,
-  useRef,
-} from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   ScrollView,
   Dimensions,
-  ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 
-import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import { useSelector, useDispatch } from 'react-redux';
+import { CredentialsContext } from '../../Shared/CredentialsContext';
 
 import axios from 'axios';
 import baseURL from '../../assets/baseURL';
-import AuthGlobal from '../../Context/store/AuthGlobal';
-import { logoutUser } from '../../Context/actions/Auth.actions';
-
-import { getTokens } from '../../Redux/Actions/tokenActions';
 
 import Chart from './Chart';
 
@@ -43,10 +31,6 @@ export function useIsMounted() {
 }
 
 const Dashboard = ({ navigation }) => {
-  const context = useContext(AuthGlobal);
-  const { tokens } = useSelector((state) => state.tokenR);
-  const dispatch = useDispatch();
-
   const isMounted = useIsMounted();
 
   const [lastInvoices, setLastInvoices] = useState([]);
@@ -55,51 +39,21 @@ const Dashboard = ({ navigation }) => {
   const [inputsSaturday, setInputsSaturday] = useState();
   const [inputsWeekDay, setInputsWeekDay] = useState();
   const [inputsPublicHoliday, setInputsPublicHoliday] = useState();
-  const [userName, setUserName] = useState();
 
-  //console.log(lastInput);
+  //context
+  const { storedCredentials, setStoredCredentials } =
+    useContext(CredentialsContext);
+  const { firstName, token, userId } = storedCredentials;
+  //console.log(userId);
 
-  useEffect(() => {
-    dispatch(getTokens());
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (
-        context.stateUser.isAuthenticated === false ||
-        context.stateUser.isAuthenticated === null
-      ) {
-        navigation.navigate('Login');
-      }
-
-      const getToken = async () => {
-        try {
-          if (context.stateUser.user.userId) {
-            await axios
-              .get(`${baseURL}users/${context.stateUser.user.userId}`)
-              .then((user) => {
-                if (isMounted.current) {
-                  setUserName(user.data);
-                }
-              })
-              .catch((error) => console.log(error));
-          }
-        } catch (e) {
-          console.log(`tryCatch Token: ${e}`);
-        }
-      };
-
-      getToken();
-
-      return () => {
-        setUserName();
-      };
-    }, [context.stateUser.isAuthenticated])
-  );
-
-  useEffect(() => {
-    dispatch(getTokens());
-  }, []);
+  //Logout function
+  const handleLogout = () => {
+    AsyncStorage.removeItem('userCredentials')
+      .then(() => {
+        setStoredCredentials('');
+      })
+      .catch((err) => console.log(err));
+  };
 
   useEffect(() => {
     navigation.addListener('focus', async () => {
@@ -112,7 +66,7 @@ const Dashboard = ({ navigation }) => {
 
               //filter by current user
               const userInvoices = data.filter(
-                (invoice) => invoice.user === context.stateUser.user.userId
+                (invoice) => invoice.user === userId
               );
               setLastInvoices(userInvoices);
             }
@@ -128,7 +82,7 @@ const Dashboard = ({ navigation }) => {
 
               //filter by current user
               const userInputs = data.filter(
-                (invoice) => invoice.user === context.stateUser.user.userId
+                (invoice) => invoice.user === userId
               );
               //console.log(userInputs[0]);
               setLastInput([userInputs[0]]);
@@ -159,7 +113,7 @@ const Dashboard = ({ navigation }) => {
 
               //filter by current user
               const graphInputs = data.filter(
-                (invoice) => invoice.user === context.stateUser.user.userId
+                (invoice) => invoice.user === userId
               );
 
               const sundayValues = graphInputs
@@ -210,7 +164,7 @@ const Dashboard = ({ navigation }) => {
           <View>
             <View style={styles.viewWelcome}>
               <Text style={styles.txtWelcome}>
-                Hello {userName ? userName.firstName : null}
+                Hello {firstName ? firstName : null}
               </Text>
             </View>
             <View style={styles.rightYellowBar} />
@@ -314,6 +268,14 @@ const Dashboard = ({ navigation }) => {
           >
             Amount
           </Text>
+          <View style={{ top: height / -1.25 }}>
+            <TouchableOpacity
+              style={styles.viewBtnLogin}
+              onPress={() => handleLogout()}
+            >
+              <Text style={styles.txtBtnLogin}>Sign Out</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </View>
     </View>
@@ -414,5 +376,27 @@ const styles = StyleSheet.create({
   viewLastInvoiceDetails: {
     alignItems: 'center',
     marginTop: 9,
+  },
+  viewBtnLogin: {
+    padding: 10,
+    marginTop: 20,
+    backgroundColor: '#ffcc00',
+    borderRadius: 10,
+    width: 120,
+    height: 50,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 1,
+    justifyContent: 'center',
+  },
+  txtBtnLogin: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

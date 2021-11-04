@@ -13,6 +13,7 @@ function authJwt() {
     path: [
       { url: /\/api\/v1\/users(.*)/, methods: ['GET', 'POST', 'OPTIONS'] },
       { url: /\/api\/v1\/adds(.*)/, methods: ['GET', 'OPTIONS'] },
+      { url: /\/api\/v1\/rates(.*)/, methods: ['GET', 'OPTIONS'] },
       { url: /\/api\/v1\/invoices(.*)/, methods: ['GET', 'OPTIONS'] },
     ],
   });

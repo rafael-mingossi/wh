@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,12 +10,14 @@ import {
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 
-//Context
-import AuthGlobal from '../../Context/store/AuthGlobal';
-import { loginUser } from '../../Context/actions/Auth.actions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { CredentialsContext } from '../../Shared/CredentialsContext';
+import axios from 'axios';
+import baseUrl from '../../assets/baseURL';
+import Toast from 'react-native-toast-message';
 
 const Login = () => {
-  const context = useContext(AuthGlobal);
   const navigation = useNavigation();
 
   const [isFocusedLogin, setIsFocusedLogin] = useState(false);
@@ -23,13 +25,9 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    if (context.stateUser.isAuthenticated === true) {
-      navigation.navigate('Main');
-    }
-  }, [context.stateUser.isAuthenticated]);
-
-  //console.log(tokens);
+  //context
+  const { storedCredentials, setStoredCredentials } =
+    useContext(CredentialsContext);
 
   const handleSubmit = () => {
     const userLogin = {
@@ -40,8 +38,36 @@ const Login = () => {
     if (email === '' || password === '') {
       alert('Please fill in your credentials');
     } else {
-      [loginUser(userLogin, context.dispatch), navigation.navigate('Main')];
+      axios
+        .post(`${baseUrl}users/login`, userLogin)
+        .then((res) => {
+          if (res.status == 200) {
+            Toast.show({
+              topOffset: 60,
+              type: 'success',
+              text1: 'Registration Succeded',
+              text2: 'Please login to continue',
+            });
+            persistLogin(res.data);
+          }
+        })
+        .catch((error) => {
+          Toast.show({
+            topOffset: 60,
+            type: 'error',
+            text1: 'Something went wrong',
+            text2: 'Please try again',
+          });
+        });
     }
+  };
+
+  const persistLogin = (credentials) => {
+    AsyncStorage.setItem('userCredentials', JSON.stringify(credentials))
+      .then(() => {
+        setStoredCredentials(credentials);
+      })
+      .catch((err) => console.log(err));
   };
 
   return (

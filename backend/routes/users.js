@@ -82,12 +82,15 @@ router.post('/login', async (req, res) => {
       {
         userId: user._id,
         isAdmin: user.isAdmin,
+        firstName: user.firstName,
       },
       secret, //this will create the token
       { expiresIn: '1w' } //and will expire the login of the user in 1 week
     );
 
-    res.status(200).send({ user: user.email, token: token });
+    res
+      .status(200)
+      .send({ firstName: user.firstName, token: token, userId: user._id });
   } else {
     res.status(400).send('password is wrong');
   }

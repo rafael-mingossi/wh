@@ -13,13 +13,13 @@ import {
 import InpustListItem from './InputsListItem';
 import { Button, Card, RadioButton } from 'react-native-paper';
 
+import { CredentialsContext } from '../../Shared/CredentialsContext';
+
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import baseURL from '../../assets/baseURL';
-import AuthGlobal from '../../Context/store/AuthGlobal';
 
 const InputsList = ({ navigation }) => {
-  const context = useContext(AuthGlobal);
   const [inputs, setInputs] = useState([]);
   const [requestData, setRequestData] = useState(new Date());
 
@@ -39,12 +39,16 @@ const InputsList = ({ navigation }) => {
     return state.inputR;
   });
 
-  //console.log(context.stateUser.user.sub);
+  //context
+  const { storedCredentials, setStoredCredentials } =
+    useContext(CredentialsContext);
+  const { token, userId } = storedCredentials;
+  //console.log(storedCredentials);
 
   useEffect(() => {
     //get Inputs
     try {
-      if (context.stateUser.user.userId) {
+      if (userId) {
         axios
           .get(`${baseURL}adds`)
           .then((res) => {
@@ -53,7 +57,7 @@ const InputsList = ({ navigation }) => {
               //console.log(res.data);
               //filter by current user
               const userInputs = data.filter(
-                (invoice) => invoice.user === context.stateUser.user.userId
+                (invoice) => invoice.user === userId
               );
               //console.log(userInputs);
               setInputs(userInputs);
@@ -81,7 +85,7 @@ const InputsList = ({ navigation }) => {
 
   useEffect(() => {
     try {
-      if (context.stateUser.user.userId) {
+      if (userId) {
         //get IDs
         axios
           .get(`${baseURL}adds/invoiceids`)
@@ -91,7 +95,7 @@ const InputsList = ({ navigation }) => {
               //console.log(res.data);
               //filter by current user
               const userInputs = data.filter(
-                (invoice) => invoice.user === context.stateUser.user.userId
+                (invoice) => invoice.user === userId
               );
               setInvoiceItems([{ items: userInputs }]);
             }
@@ -109,7 +113,7 @@ const InputsList = ({ navigation }) => {
 
               //filter by current user
               const userInputs = data.filter(
-                (invoice) => invoice.user === context.stateUser.user.userId
+                (invoice) => invoice.user === userId
               );
 
               const arr = userInputs.map((value) => value.totalAmount);
@@ -130,7 +134,7 @@ const InputsList = ({ navigation }) => {
               //console.log(data);
               //filter by current user
               const userInputs = data.filter(
-                (invoice) => invoice.user === context.stateUser.user.userId
+                (invoice) => invoice.user === userId
               );
               if (userInputs.length <= 0) {
                 setInvoiceNumber('1');
@@ -155,8 +159,15 @@ const InputsList = ({ navigation }) => {
   }, [inputs]);
 
   const handleRemoveRate = (id) => {
+    const validToken = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
     axios
-      .delete(`${baseURL}adds/${id}`)
+      .delete(`${baseURL}adds/${id}`, validToken)
       .then((res) => {
         const newList = inputs.filter((item) => item.id !== id);
         //dispatch({ type: 'ADD_DAY', payload: newList });
@@ -178,8 +189,15 @@ const InputsList = ({ navigation }) => {
         invoiceAmount,
       };
 
+      const validToken = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
       axios
-        .post(`${baseURL}invoices`, invoiceDetails)
+        .post(`${baseURL}invoices`, invoiceDetails, validToken)
         .then((res) => [
           setInvoices(res.data),
           //alert('invoice created'),

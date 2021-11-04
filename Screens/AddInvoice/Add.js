@@ -13,7 +13,7 @@ import {
 import { Button, Card } from 'react-native-paper';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import AuthGlobal from '../../Context/store/AuthGlobal';
+import { CredentialsContext } from '../../Shared/CredentialsContext';
 
 import { Picker } from '@react-native-picker/picker';
 
@@ -35,9 +35,6 @@ import { hours as dataHours, minutes as dataMinutes } from '../../assets/data';
 var defaultDay = moment().format('DD-MM-YYYY');
 
 const Add = ({ navigation }) => {
-  const context = useContext(AuthGlobal);
-  const [token, setToken] = useState();
-  const [userName, setUserName] = useState();
   const [loadingAuth, setLoadingAuth] = useState(true);
 
   const [location, setLocation] = useState('');
@@ -77,7 +74,11 @@ const Add = ({ navigation }) => {
     return state.rateR;
   });
 
-  const dispatch = useDispatch();
+  //context
+  const { storedCredentials, setStoredCredentials } =
+    useContext(CredentialsContext);
+  const { firstName, token, userId } = storedCredentials;
+  //console.log(storedCredentials);
 
   //controlls the TIME inputs
   useEffect(() => {
@@ -98,38 +99,6 @@ const Add = ({ navigation }) => {
     setTotalAmount(totalAmounts.toFixed(2).toString());
   }, [initHours, initMinutes, finishHours, finishMinutes, totalHours, rateDay]);
 
-  useEffect(() => {
-    const getToken = async () => {
-      try {
-        await AsyncStorage.getItem('jwt')
-          .then((res) => {
-            if (loadingAuth) {
-              setToken(res);
-              //console.log(res);
-              axios
-                .get(`${baseURL}users/${context.stateUser.user.userId}`, {
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${res}`,
-                  },
-                })
-                .then((user) => setUserName(user.data));
-            }
-          })
-          .catch((error) => console.log(error));
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    getToken();
-
-    return () => {
-      setToken();
-      setLoadingAuth(false);
-      setUserName();
-    };
-  }, []);
-
   const handleAddDay = () => {
     let details = {
       rateDay,
@@ -141,7 +110,7 @@ const Add = ({ navigation }) => {
       totalHours,
       comments,
       totalAmount,
-      user: userName._id,
+      user: userId,
     };
 
     const validToken = {
@@ -158,7 +127,7 @@ const Add = ({ navigation }) => {
       .then((res) => [
         setData([...data, res.data]),
         alert('new day added'),
-        dispatch({ type: 'ADD_DAY', payload: [...data, res.data] }),
+        //dispatch({ type: 'ADD_DAY', payload: [...data, res.data] }),
       ])
       .catch((error) => {
         [alert('Something went wrong, try again'), console.error(error)];
