@@ -1,7 +1,59 @@
-export const ADD_RATE = 'ADD_RATE';
-export const REMOVE_RATE = 'REMOVE_RATE';
-export const GET_RATE = 'GET_RATE';
+//rates constants
+export const GET_RATE_REQUEST = 'GET_RATE_REQUEST';
+export const GET_RATE_SUCCESS = 'GET_RATE_SUCCESS';
+export const GET_RATE_FAIL = 'GET_RATE_FAIL';
 
-export const ADD_DAY = 'ADD_DAY';
-export const GET_DAY = 'GET_DAY';
-export const REMOVE_DAY = 'REMOVE_DAY';
+export const ADD_RATE_REQUEST = 'ADD_RATE_REQUEST';
+export const ADD_RATE_SUCCESS = 'ADD_RATE_SUCCESS';
+export const ADD_RATE_FAIL = 'ADD_RATE_FAIL';
+
+export const DELETE_RATE_REQUEST = 'DELETE_RATE_REQUEST';
+export const DELETE_RATE_SUCCESS = 'DELETE_RATE_SUCCESS';
+export const DELETE_RATE_FAIL = 'DELETE_RATE_FAIL';
+
+//inputs constants
+export const GET_DAY_REQUEST = 'GET_DAY_REQUEST';
+export const GET_DAY_SUCCESS = 'GET_DAY_SUCCESS';
+export const GET_DAY_FAIL = 'GET_DAY_FAIL';
+
+export const ADD_DAY_REQUEST = 'ADD_DAY_REQUEST';
+export const ADD_DAY_SUCCESS = 'ADD_DAY_SUCCESS';
+export const ADD_DAY_FAIL = 'ADD_DAY_FAIL';
+
+export const DELETE_DAY_REQUEST = 'DELETE_DAY_REQUEST';
+export const DELETE_DAY_SUCCESS = 'DELETE_DAY_SUCCESS';
+export const DELETE_DAY_FAIL = 'DELETE_DAY_FAIL';
+
+//user constants
+export const USER_LOGIN_REQUEST = 'USER_LOGIN_REQUEST';
+export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
+export const USER_LOGIN_FAIL = 'USER_LOGIN_FAIL';
+export const USER_LOGOUT = 'USER_LOGOUT';
+
+export const USER_REGISTER_REQUEST = 'USER_REGISTER_REQUEST';
+export const USER_REGISTER_SUCCESS = 'USER_REGISTER_SUCCESS';
+export const USER_REGISTER_FAIL = 'USER_REGISTER_FAIL';
+
+//invoices constants
+export const INVOICE_REQUEST = 'INVOICE_REQUEST';
+export const INVOICE_SUCCESS = 'INVOICE_SUCCESS';
+export const INVOICE_FAIL = 'INVOICE_FAIL';
+
+export const DELETE_INVOICE_REQUEST = 'DELETE_INVOICE_REQUEST';
+export const DELETE_INVOICE_SUCCESS = 'DELETE_INVOICE_SUCCESS';
+export const DELETE_INVOICE_FAIL = 'DELETE_INVOICE_FAIL';
+
+//invoice items
+export const ITEMS_REQUEST = 'ITEMS_REQUEST';
+export const ITEMS_SUCCESS = 'ITEMS_SUCCESS';
+export const ITEMS_FAIL = 'ITEMS_FAIL';
+
+//invoice total
+export const AMOUNT_REQUEST = 'AMOUNT_REQUEST';
+export const AMOUNT_SUCCESS = 'AMOUNT_SUCCESS';
+export const AMOUNT_FAIL = 'AMOUNT_FAIL';
+
+//invoice number
+export const NUMBER_REQUEST = 'NUMBER_REQUEST';
+export const NUMBER_SUCCESS = 'NUMBER_SUCCESS';
+export const NUMBER_FAIL = 'NUMBER_FAIL';

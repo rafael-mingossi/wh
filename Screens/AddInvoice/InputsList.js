@@ -6,12 +6,11 @@ import {
   FlatList,
   Text,
   ActivityIndicator,
-  TouchableWithoutFeedback,
-  Keyboard,
 } from 'react-native';
 
 import InpustListItem from './InputsListItem';
 import { Button, Card, RadioButton } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 import { CredentialsContext } from '../../Shared/CredentialsContext';
 
@@ -19,174 +18,86 @@ import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import baseURL from '../../assets/baseURL';
 
-const InputsList = ({ navigation }) => {
-  const [inputs, setInputs] = useState([]);
-  const [requestData, setRequestData] = useState(new Date());
+import {
+  getAddedDaysHandler,
+  deleteAddedDayHanler,
+} from '../../Redux/Actions/addDayActions';
 
-  const [invoiceItems, setInvoiceItems] = useState();
+import {
+  getAmountHandler,
+  getItemsHandler,
+  getInvNumberHandler,
+} from '../../Redux/Actions/invoicesActions';
+
+const InputsList = ({ navigation }) => {
   const [invoiceNumber, setInvoiceNumber] = useState('');
-  const [invoiceAmount, setInvoiceAmount] = useState('0');
   const [invoices, setInvoices] = useState([]);
   const [currentAmount, setCurrentAmount] = useState();
 
-  const [invStatus, setInvStatus] = useState();
-
-  const [loading, setLoading] = useState(true);
-
   const dispatch = useDispatch();
 
-  const inputsReg = useSelector((state) => {
-    return state.inputR;
-  });
-
   //context
-  const { storedCredentials, setStoredCredentials } =
-    useContext(CredentialsContext);
+  const { storedCredentials } = useContext(CredentialsContext);
   const { token, userId } = storedCredentials;
-  //console.log(storedCredentials);
 
-  useEffect(() => {
-    //get Inputs
-    try {
-      if (userId) {
-        axios
-          .get(`${baseURL}adds`)
-          .then((res) => {
-            if (res) {
-              const data = res.data;
-              //console.log(res.data);
-              //filter by current user
-              const userInputs = data.filter(
-                (invoice) => invoice.user === userId
-              );
-              //console.log(userInputs);
-              setInputs(userInputs);
-              //this will get only the inputs with status 'open'
-              setInvStatus(
-                userInputs
-                  .filter((filt) => filt.status === 'open')
-                  .map((el) => el)
-              );
-              //console.log(invStatus);
-              //dispatch({ type: 'ADD_DAY', payload: res.data });
-              setLoading(false);
-            }
-          })
-          .catch((error) => alert('Error to load inputs'));
-      }
-    } catch (e) {
-      console.log(e);
-    }
+  //redux get added days
+  const dayR = useSelector((state) => state.dayR);
+  const { loading: loadingD, inputs, success: addSuccess } = dayR;
 
-    return () => {
-      setInputs();
-    };
-  }, [requestData, invoices]);
+  //redux get invoice items
+  const invoiceItemsR = useSelector((state) => state.invoiceItemsR);
+  const { items, loading: loadingR } = invoiceItemsR;
+  console.log(items);
 
-  useEffect(() => {
-    try {
-      if (userId) {
-        //get IDs
-        axios
-          .get(`${baseURL}adds/invoiceids`)
-          .then((res) => {
-            if (res) {
-              const data = res.data;
-              //console.log(res.data);
-              //filter by current user
-              const userInputs = data.filter(
-                (invoice) => invoice.user === userId
-              );
-              setInvoiceItems([{ items: userInputs }]);
-            }
+  //redux get invoice number
+  const invoiceNumberR = useSelector((state) => state.invoiceNumberR);
+  const { number, loading: loadingN } = invoiceNumberR;
 
-            //console.log(res.data);
-          })
-          .catch((error) => alert('Error to load inputs'));
+  //redux get invoice amount
+  const invoiceAmountR = useSelector((state) => state.invoiceAmountR);
+  const { loading: loadingA, amount } = invoiceAmountR;
+  //console.log(amount);
 
-        //get total amounts
-        axios
-          .get(`${baseURL}adds/amounts`)
-          .then((res) => {
-            if (res) {
-              const data = res.data;
+  //redux delete added days
+  const deleteDayR = useSelector((state) => state.deleteDayR);
+  const { success: successDel } = deleteDayR;
 
-              //filter by current user
-              const userInputs = data.filter(
-                (invoice) => invoice.user === userId
-              );
-
-              const arr = userInputs.map((value) => value.totalAmount);
-              if (arr) {
-                const totalAmount = arr.reduce((a, b) => a + b, 0);
-                setCurrentAmount(totalAmount);
-              }
-            }
-          })
-          .catch((error) => console.error(error));
-
-        //get invoice Number
-        axios
-          .get(`${baseURL}invoices/numbers`)
-          .then((res) => {
-            if (res) {
-              const data = res.data;
-              //console.log(data);
-              //filter by current user
-              const userInputs = data.filter(
-                (invoice) => invoice.user === userId
-              );
-              if (userInputs.length <= 0) {
-                setInvoiceNumber('1');
-              } else {
-                setInvoiceNumber((userInputs[0] + 1).toString());
-              }
-            }
-
-            //console.log(res.data[0]);
-          })
-          .catch((error) => alert('Error to load invoice numbers'));
-      }
-    } catch (error) {
-      console.log(error);
-    }
-
-    return () => {
-      setInvoiceItems();
-      setCurrentAmount();
-      setInvoiceNumber();
-    };
-  }, [inputs]);
-
-  const handleRemoveRate = (id) => {
-    const validToken = {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    axios
-      .delete(`${baseURL}adds/${id}`, validToken)
-      .then((res) => {
-        const newList = inputs.filter((item) => item.id !== id);
-        //dispatch({ type: 'ADD_DAY', payload: newList });
-        setInputs(newList);
-        setRequestData(new Date());
-      })
-      .catch((error) => alert('Error to delete item'));
+  const delDayHandler = (id) => {
+    dispatch(deleteAddedDayHanler(id, token));
   };
 
+  // useEffect(() => {
+  //   navigation.addListener('focus', () => {
+  //     dispatch(getInvNumberHandler(userId));
+
+  //     if (number) {
+  //       setInvoiceNumber(number.toString());
+  //     }
+  //   });
+  // }, [dispatch, successDel, invoices, addSuccess]);
+
+  useEffect(() => {
+    dispatch(getItemsHandler(userId));
+    dispatch(getAddedDaysHandler(userId));
+    dispatch(getAmountHandler(userId));
+    dispatch(getInvNumberHandler(userId));
+
+    if (number) {
+      setInvoiceNumber(number.toString());
+    }
+  }, [dispatch, successDel, invoices, addSuccess]);
+
   const handleCreateInvoice = () => {
-    if (!invoiceItems || inputs.length < 0) {
+    if (!items || inputs.length < 0 || amount == '$ 0.00') {
       alert('You have no worked days added!');
     } else if (invoiceNumber === '') {
       alert('Invoice Number cannot be empty!');
     } else {
       let invoiceDetails = {
-        invoiceItems,
-        invoiceNumber,
-        invoiceAmount,
+        invoiceItems: items,
+        invoiceNumber: number,
+        amount,
+        user: userId,
       };
 
       const validToken = {
@@ -200,29 +111,36 @@ const InputsList = ({ navigation }) => {
         .post(`${baseURL}invoices`, invoiceDetails, validToken)
         .then((res) => [
           setInvoices(res.data),
+
           //alert('invoice created'),
-          dispatch({ type: 'GET_INVOICE', payload: res.data }),
-
-          axios
-            .post(`${baseURL}adds/all`)
-            .then((res) => {
-              //console.log(res.data);
-            })
-            .catch((error) => {
-              console.error(error);
-            }),
-
-          // setTimeout(() => {
-          //   navigation.navigate('Invoices');
-          // }, 700),
+          //dispatch({ type: 'GET_INVOICE', payload: res.data }),
         ])
         .catch((error) => {
           [alert('This invoice number already exists'), console.error(error)];
         });
+
+      let statusUpdate = {
+        user: userId,
+      };
+      setTimeout(() => {
+        axios
+          .post(`${baseURL}adds/all`, statusUpdate, validToken)
+          .then((res) => {
+            Toast.show({
+              topOffset: 60,
+              type: 'success',
+              text1: 'Invoice Created',
+              text2: 'Check Invoice Tab to see details',
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }, 300);
     }
   };
 
-  if (loading) {
+  if (loadingD) {
     return (
       <View style={styles.spinner}>
         <ActivityIndicator size="large" color="red" />
@@ -238,10 +156,13 @@ const InputsList = ({ navigation }) => {
             <Text>Invoice</Text>
             <Text>Amount</Text>
           </View>
+
           <View style={styles.amountView}>
-            <Text style={{ fontWeight: 'bold' }}>
-              {currentAmount ? `$ ${currentAmount}` : '$ 0.00'}
-            </Text>
+            {amount ? (
+              <Text style={{ fontWeight: 'bold' }}>$ {amount}</Text>
+            ) : (
+              <Text style={{ fontWeight: 'bold' }}>$ 0.00</Text>
+            )}
           </View>
         </View>
         <View style={styles.invoiceNoView}>
@@ -249,36 +170,50 @@ const InputsList = ({ navigation }) => {
             <Text>Invoice</Text>
             <Text>No.</Text>
           </View>
-          <TextInput
-            label="Invoice No."
-            value={invoiceNumber}
-            style={styles.input}
-            keyboardType="number-pad"
-            onChangeText={(text) => setInvoiceNumber(text)}
-          />
+          {loadingN ? null : (
+            <TextInput
+              label="Invoice No."
+              value={number.toString()}
+              style={styles.input}
+              keyboardType="number-pad"
+              onChangeText={(text) => setInvoiceNumber(text)}
+            />
+          )}
         </View>
       </View>
       <View style={{ marginBottom: 60, marginTop: 50 }}>
-        <FlatList
-          data={invStatus}
-          renderItem={({ item, index }) => (
-            <InpustListItem
-              day={item.rateDay}
-              start={item.startTime}
-              id={item._id}
-              index={index}
-              finish={item.finishTime}
-              child={item.child}
-              date={item.date}
-              location={item.location}
-              status={item.status}
-              amount={item.totalAmount}
-              hours={item.totalHours}
-              delete={handleRemoveRate}
-            />
-          )}
-          keyExtractor={(item) => item._id.toString()}
-        />
+        {inputs ? (
+          <FlatList
+            data={inputs}
+            renderItem={({ item, index }) => (
+              <InpustListItem
+                day={item.rateDay}
+                start={item.startTime}
+                id={item._id}
+                index={index}
+                finish={item.finishTime}
+                child={item.child}
+                date={item.date}
+                location={item.location}
+                status={item.status}
+                amount={item.totalAmount}
+                hours={item.totalHours}
+                delete={delDayHandler}
+              />
+            )}
+            keyExtractor={(item) => item._id.toString()}
+          />
+        ) : (
+          <Text
+            style={{
+              justifyContent: 'center',
+              textAlign: 'center',
+              marginVertical: 100,
+            }}
+          >
+            Please, add your worked days to start!
+          </Text>
+        )}
       </View>
 
       <View style={styles.viewBtn}>

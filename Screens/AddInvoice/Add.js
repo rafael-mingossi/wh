@@ -7,13 +7,14 @@ import {
   SafeAreaView,
   FlatList,
   Platform,
-  Alert,
+  ActivityIndicator,
   TextInput,
 } from 'react-native';
 import { Button, Card } from 'react-native-paper';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CredentialsContext } from '../../Shared/CredentialsContext';
+import { getRatesHandler } from '../../Redux/Actions/rateActions';
+import { addNewDayHandle } from '../../Redux/Actions/addDayActions';
 
 import { Picker } from '@react-native-picker/picker';
 
@@ -23,11 +24,9 @@ import ConfirmModal from './ConfirmModal';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-
 import CustomRadio from './CustomRadio';
 
-import axios from 'axios';
-import baseURL from '../../assets/baseURL';
+import Colors from '../../Shared/colors';
 
 import moment from 'moment';
 import { hours as dataHours, minutes as dataMinutes } from '../../assets/data';
@@ -35,8 +34,6 @@ import { hours as dataHours, minutes as dataMinutes } from '../../assets/data';
 var defaultDay = moment().format('DD-MM-YYYY');
 
 const Add = ({ navigation }) => {
-  const [loadingAuth, setLoadingAuth] = useState(true);
-
   const [location, setLocation] = useState('');
   const [comments, setComments] = useState('');
   const [child, setChild] = useState('');
@@ -63,21 +60,28 @@ const Add = ({ navigation }) => {
   const [startTimeValidation, setStartTimeValidation] = useState('');
   const [finishTimeValidation, setFinishTimeValidation] = useState('');
 
-  const [data, setData] = useState([]);
   const [detailsModal, setDetailsModal] = useState();
 
   const [isFocusedLocal, setIsFocusedLocal] = useState(false);
   const [isFocusedChild, setIsFocusedChild] = useState(false);
   const [isFocusedComment, setIsFocusedComment] = useState(false);
 
-  const ratesReg = useSelector((state) => {
-    return state.rateR;
-  });
+  const dispatch = useDispatch();
+
+  //redux get rates
+  const rateR = useSelector((state) => state.rateR);
+
+  //redux add days
+  const addDayR = useSelector((state) => state.addDayR);
+  const { success } = addDayR;
+
+  useEffect(() => {
+    dispatch(getRatesHandler(userId));
+  }, [dispatch, success]);
 
   //context
-  const { storedCredentials, setStoredCredentials } =
-    useContext(CredentialsContext);
-  const { firstName, token, userId } = storedCredentials;
+  const { storedCredentials } = useContext(CredentialsContext);
+  const { token, userId } = storedCredentials;
   //console.log(storedCredentials);
 
   //controlls the TIME inputs
@@ -100,38 +104,21 @@ const Add = ({ navigation }) => {
   }, [initHours, initMinutes, finishHours, finishMinutes, totalHours, rateDay]);
 
   const handleAddDay = () => {
-    let details = {
-      rateDay,
-      date,
-      startTime,
-      finishTime,
-      location,
-      child,
-      totalHours,
-      comments,
-      totalAmount,
-      user: userId,
-    };
-
-    const validToken = {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    //console.log(details);
-
-    axios
-      .post(`${baseURL}adds`, details, validToken)
-      .then((res) => [
-        setData([...data, res.data]),
-        alert('new day added'),
-        //dispatch({ type: 'ADD_DAY', payload: [...data, res.data] }),
-      ])
-      .catch((error) => {
-        [alert('Something went wrong, try again'), console.error(error)];
-      });
+    dispatch(
+      addNewDayHandle(
+        rateDay,
+        date,
+        startTime,
+        finishTime,
+        location,
+        child,
+        totalHours,
+        comments,
+        totalAmount,
+        userId,
+        token
+      )
+    );
 
     setLocation('');
     setComments('');
@@ -224,9 +211,10 @@ const Add = ({ navigation }) => {
       <SafeAreaView>
         <ScrollView contentContainerStyle={{ flex: 1, alignItems: 'center' }}>
           <View style={{ width: '100%' }}>
-            {ratesReg.length >= 1 ? (
+            {rateR.loading && <ActivityIndicator size="large" color="red" />}
+            {rateR ? (
               <FlatList
-                data={ratesReg}
+                data={rateR.rates}
                 renderItem={renderDays}
                 horizontal={true}
                 keyExtractor={(item) => item._id}
@@ -458,13 +446,14 @@ const Add = ({ navigation }) => {
             style={{
               flexDirection: 'row',
               marginTop: 20,
+              marginBottom: 10,
             }}
           >
             <Button
               icon="content-save"
               mode="contained"
               style={{ width: 100, alignSelf: 'center', marginRight: 30 }}
-              theme={{ colors: { primary: '#5c4b4d' } }}
+              theme={{ colors: { primary: Colors.primary } }}
               onPress={() => {
                 calcRate();
               }}
@@ -475,11 +464,11 @@ const Add = ({ navigation }) => {
             <Button
               icon="file-check"
               mode="contained"
-              style={{ width: 180, alignSelf: 'center' }}
-              theme={{ colors: { primary: '#5c4b4d' } }}
+              style={{ width: 100, alignSelf: 'center' }}
+              theme={{ colors: { primary: Colors.primary } }}
               onPress={() => navigation.navigate('InputsList')}
             >
-              Check Inputs
+              Inputs
             </Button>
             {confirmModal === true ? (
               <ConfirmModal

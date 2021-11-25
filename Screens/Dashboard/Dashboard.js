@@ -10,6 +10,7 @@ import {
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CredentialsContext } from '../../Shared/CredentialsContext';
+import { useSelector, useDispatch } from 'react-redux';
 
 import axios from 'axios';
 import baseURL from '../../assets/baseURL';
@@ -44,7 +45,7 @@ const Dashboard = ({ navigation }) => {
   const { storedCredentials, setStoredCredentials } =
     useContext(CredentialsContext);
   const { firstName, token, userId } = storedCredentials;
-  //console.log(userId);
+  //console.log(lastInvoices);
 
   //Logout function
   const handleLogout = () => {
@@ -58,6 +59,21 @@ const Dashboard = ({ navigation }) => {
   useEffect(() => {
     navigation.addListener('focus', async () => {
       try {
+        // let userIds = { userId: userId };
+
+        // await axios
+        //   .get(`${baseURL}invoices/lastinvoice`, userIds)
+        //   .then((res) => {
+        //     //console.log(res);
+        //     if (isMounted.current) {
+        //       // console.log(res);
+        //       if (res) {
+        //         setLastInvoices(res.data);
+        //       }
+        //     }
+        //   })
+        //   .catch((error) => console.log(`Load Invoices: ${error}`));
+
         await axios
           .get(`${baseURL}invoices/lastinvoice`)
           .then((res) => {
@@ -68,7 +84,13 @@ const Dashboard = ({ navigation }) => {
               const userInvoices = data.filter(
                 (invoice) => invoice.user === userId
               );
-              setLastInvoices(userInvoices);
+
+              //let lastInv = userInvoices[userInvoices.length - 1];
+              let lastInv = userInvoices.slice(-1);
+              if (lastInv) {
+                //console.log(lastInv);
+                setLastInvoices(lastInv);
+              }
             }
           })
           .catch((error) => console.log(`Load Invoices: ${error}`));
@@ -223,9 +245,11 @@ const Dashboard = ({ navigation }) => {
                     );
                   } else {
                     return (
-                      <Text style={{ textAlign: 'center', marginTop: 30 }}>
-                        You have no Inputs added
-                      </Text>
+                      <View key={Math.random()}>
+                        <Text style={{ textAlign: 'center', marginTop: 30 }}>
+                          You have no Inputs added
+                        </Text>
+                      </View>
                     );
                   }
                 })}

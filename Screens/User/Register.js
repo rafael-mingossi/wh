@@ -66,7 +66,7 @@ const Register = () => {
             topOffset: 60,
             type: 'success',
             text1: 'Registration Succeded',
-            text2: 'Please login to continue',
+            text2: 'Logged In Successfully',
           });
           persistLogin(res.data);
         }

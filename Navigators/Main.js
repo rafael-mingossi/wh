@@ -17,7 +17,7 @@ const Main = () => {
       initialRouteName="Home"
       tabBarOptions={{
         keyboardHidesTabBar: true,
-        showLabel: false,
+        showLabel: true,
         activeTintColor: '#e91e63',
       }}
     >
@@ -40,7 +40,7 @@ const Main = () => {
         }}
       />
       <Tab.Screen
-        name="Invoice"
+        name="Invoices"
         component={InvoiceNavigator}
         options={{
           tabBarIcon: ({ color }) => (
@@ -49,7 +49,7 @@ const Main = () => {
         }}
       />
       <Tab.Screen
-        name="Rate"
+        name="Rates"
         component={RateNavigator}
         options={{
           tabBarIcon: ({ color }) => (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   StyleSheet,
   Text,
@@ -22,36 +22,41 @@ import { CredentialsContext } from '../../Shared/CredentialsContext';
 
 import { useSelector, useDispatch } from 'react-redux';
 
-import EasyButton from '../../Shared/EasyButton';
+import Btn from '../../Shared/Btn';
 import RatesItem from './RatesItem';
+import Colors from '../../Shared/colors';
 
-import axios from 'axios';
-import baseURL from '../../assets/baseURL';
+import {
+  getRatesHandler,
+  addRateHandler,
+  deleteRateHanler,
+} from '../../Redux/Actions/rateActions';
 
 var { width } = Dimensions.get('window');
 
 export default function Rates() {
   const [day, setDay] = useState('Saturday');
   const [value, setValue] = useState('');
-  const [rates, setRates] = useState();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [isRender, setIsRender] = useState(false);
-  const [requestData, setRequestData] = useState(new Date());
 
   const dispatch = useDispatch();
 
-  const ratesReg = useSelector((state) => {
-    return state.rateR;
-  });
+  //redux get rates
+  const rateR = useSelector((state) => state.rateR);
+  const { loading } = rateR;
 
-  //console.log(rates);
+  //redux add rates
+  const addRateR = useSelector((state) => state.addRateR);
+  const { success } = addRateR;
+
+  //redux delete rates
+  const deleteRateR = useSelector((state) => state.deleteRateR);
+  const { success: successDel } = deleteRateR;
 
   //context
-  const { storedCredentials, setStoredCredentials } =
-    useContext(CredentialsContext);
+  const { storedCredentials } = useContext(CredentialsContext);
   const { token, userId } = storedCredentials;
-  //console.log(rates);
 
   const days = [
     { name: 'Saturday', id: '1' },
@@ -61,97 +66,30 @@ export default function Rates() {
   ];
 
   useEffect(() => {
-    try {
-      axios
-        .get(`${baseURL}rates`)
-        .then((res) => {
-          if (userId) {
-            const data = res.data;
+    dispatch(getRatesHandler(userId));
+  }, [dispatch, success, successDel]);
 
-            //filter by current user
-            const userInputs = data.filter(
-              (invoice) => invoice.user === userId
-            );
-            setRates(userInputs);
-          }
-        })
-        .catch((error) => console.log(`Error loading rates: ${error}`));
-    } catch (err) {
-      console.log(err);
+  const submitRateHandler = () => {
+    if (!day || !value) {
+      Toast.show({
+        topOffset: 60,
+        type: 'error',
+        text1: 'Day and Value must be provided',
+        text2: '',
+      });
+    } else if (!userId || !token) {
+      Toast.show({
+        topOffset: 60,
+        type: 'error',
+        text1: 'Something went wrong',
+        text2: 'Please try again',
+      });
     }
-
-    return () => {
-      setRates();
-    };
-  }, [requestData]);
-
-  const handleAddRate = () => {
-    if (day === '' || value === '') {
-      alert('Day or Value cannot be empty');
-    } else {
-      let ratess = {
-        day: day,
-        value: value,
-        user: userId,
-      };
-
-      const validToken = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      axios
-        .post(`${baseURL}rates`, ratess, validToken)
-        .then((res) => [
-          setRates([...rates, res.data]),
-          Toast.show({
-            topOffset: 60,
-            type: 'success',
-            text1: 'Rate added',
-            text2: '',
-          }),
-          dispatch({ type: 'ADD_RATE', payload: [...rates, res.data] }),
-        ])
-        .catch((error) => {
-          Toast.show({
-            topOffset: 60,
-            type: 'error',
-            text1: 'This rate already exists',
-            text2: 'Delete before adding a new one',
-          });
-        });
-    }
+    dispatch(addRateHandler(day, value, userId, token));
   };
 
-  const handleRemoveRate = (id) => {
-    const validToken = {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    axios
-      .delete(`${baseURL}rates/${id}`, validToken)
-      .then((res) => {
-        //console.log(res.data.success);
-        const newRates = rates.filter((item) => item.id !== id);
-        //const newRates = rates.splice(index, 1);
-        dispatch({ type: 'ADD_RATE', payload: newRates });
-        setRates(newRates);
-        setRequestData(new Date());
-        setIsRender(true);
-      })
-      .catch((error) => {
-        Toast.show({
-          topOffset: 60,
-          type: 'error',
-          text1: 'Error to delete rate',
-          text2: '',
-        });
-      });
+  const delRateHandler = (id) => {
+    dispatch(deleteRateHanler(id, token));
   };
 
   return (
@@ -161,26 +99,51 @@ export default function Rates() {
       }}
       accessible={false}
     >
-      <View style={{ padding: 10, marginTop: 80 }}>
-        <View style={{ alignItems: 'center', padding: 10 }}>
-          <Text>Select your Rate</Text>
+      <View style={{ padding: 10, marginTop: 30 }}>
+        <View
+          style={{
+            alignItems: 'center',
+            padding: 10,
+            backgroundColor: Colors.secondaryGray,
+            width: '70%',
+            alignSelf: 'center',
+            borderRadius: 10,
+            marginBottom: 15,
+          }}
+        >
+          <Text style={styles.headerTxt}>Select your Rates</Text>
         </View>
         <View>
           {Platform.OS === 'android' ? (
-            <Picker
-              mode="dropdown"
-              iosIcon={<Icon name="arrow-down" color={'#007aff'} />}
-              placeholder=". . ."
-              placeholderStyle={{ color: '#007aff' }}
-              placeholderIconColor="#007aff"
-              style={{ width: width / 1.6, height: 40, alignSelf: 'center' }}
-              selectedValue={day}
-              onValueChange={(e) => setDay(e)}
+            <View
+              style={{
+                borderWidth: 1,
+                borderRadius: 5,
+                width: '60%',
+                alignSelf: 'center',
+                marginBottom: 10,
+              }}
             >
-              {days.map((c) => {
-                return <Picker.Item key={c.id} label={c.name} value={c.name} />;
-              })}
-            </Picker>
+              <Picker
+                mode="dropdown"
+                iosIcon={<Icon name="arrow-down" color={'#007aff'} />}
+                placeholder=". . ."
+                placeholderStyle={{ color: '#007aff' }}
+                style={{
+                  width: '90%',
+                  height: 40,
+                  alignSelf: 'center',
+                }}
+                selectedValue={day}
+                onValueChange={(e) => setDay(e)}
+              >
+                {days.map((c) => {
+                  return (
+                    <Picker.Item key={c.id} label={c.name} value={c.name} />
+                  );
+                })}
+              </Picker>
+            </View>
           ) : (
             <TouchableOpacity
               style={styles.iosView}
@@ -236,6 +199,7 @@ export default function Rates() {
             marginBottom: 15,
             alignSelf: 'center',
             flexDirection: 'row',
+            justifyContent: 'space-around',
           }}
         >
           <TextInput
@@ -245,27 +209,26 @@ export default function Rates() {
             keyboardType={'numeric'}
             onChangeText={(text) => setValue(text)}
           />
-          <EasyButton secondary medium onPress={() => handleAddRate()}>
-            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-              Add
-            </Text>
-          </EasyButton>
+          <Btn
+            btnTitle={'Add'}
+            clickFn={submitRateHandler}
+            style={styles.btn}
+          />
         </View>
-
-        {rates ? (
+        {loading && <ActivityIndicator size="large" color="red" />}
+        {rateR ? (
           <FlatList
-            data={rates}
+            data={rateR.rates}
             renderItem={({ item, index }) => (
               <RatesItem
                 day={item.day}
                 value={item.value}
                 id={item._id}
                 index={index}
-                delete={handleRemoveRate}
+                delete={delRateHandler}
               />
             )}
             keyExtractor={(item) => item._id}
-            extraData={isRender}
           />
         ) : (
           <Text style={{ justifyContent: 'center', textAlign: 'center' }}>
@@ -334,5 +297,13 @@ const styles = StyleSheet.create({
     height: '50%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  btn: {
+    height: 40,
+    margin: 5,
+  },
+  headerTxt: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });

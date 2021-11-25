@@ -21,39 +21,62 @@ router.get('/lastinput', async (req, res) => {
   res.status(200).send(lastInput);
 });
 
-router.get('/invoiceids', async (req, res) => {
-  const inputsList = await Add.find();
+router.get('/amounts/:userId', async (req, res) => {
+  try {
+    const inputsList = await Add.find();
 
-  const filterOpen = inputsList
-    .filter((filt) => filt.status === 'open')
-    .map((el) => el);
+    const userId = req.params.userId;
 
-  const arr = filterOpen.map((value) => value._id); //gera 1 array com 3 items
+    const filterOpen = inputsList
+      .filter((filt) => filt.status === 'open')
+      .map((el) => el);
 
-  //console.log(arr);
+    //filter by current user
+    if (userId) {
+      const userInputs = filterOpen.filter((invoice) => invoice.user == userId);
+      if (!userInputs) {
+        res.status(500).json({ success: false });
+      }
+      var invoiceItems = { items: [] };
 
-  if (!arr) {
-    res.status(500).json({ success: false });
+      for (const value of userInputs) {
+        invoiceItems.items.push(value._id);
+      }
+
+      res.status(200).send([invoiceItems]);
+      //console.log(invoiceItems);
+    }
+  } catch (err) {
+    console.error(err);
   }
-  res.status(200).send(arr);
 });
 
-router.get('/amounts', async (req, res) => {
-  const inputsList = await Add.find();
+router.get('/invoiceamounts/:userId', async (req, res) => {
+  try {
+    const inputsList = await Add.find();
 
-  const filterOpen = inputsList
-    .filter((filt) => filt.status === 'open')
-    .map((el) => el);
+    const userId = req.params.userId;
 
-  //console.log(filterOpen);
-  //const arr = filterOpen.map((value) => value.totalAmount);
+    const filterOpen = inputsList
+      .filter((filt) => filt.status === 'open')
+      .map((el) => el);
 
-  //console.log(arr);
+    //filter by current user
+    if (userId) {
+      const userInputs = filterOpen.filter((invoice) => invoice.user == userId);
+      if (!userInputs) {
+        res.status(500).json({ success: false });
+      }
 
-  if (!filterOpen) {
-    res.status(500).json({ success: false });
+      const arrayTotalAmount = userInputs.map((value) => value.totalAmount);
+
+      const totalAmount = arrayTotalAmount.reduce((a, b) => a + b, 0);
+
+      res.status(200).send(totalAmount.toString());
+    }
+  } catch (err) {
+    console.log(err);
   }
-  res.status(200).send(filterOpen);
 });
 
 router.get('/:id', async (req, res) => {
@@ -127,13 +150,19 @@ router.put('/:id', async (req, res) => {
 });
 
 router.post('/all', async (req, res) => {
-  const input = await Add.updateMany({}, { $set: { status: 'closed' } });
-  //console.log(input);
+  try {
+    const input = await Add.updateMany(
+      { user: { $eq: req.body.user } },
+      { $set: { status: 'closed' } }
+    );
 
-  if (!input) {
-    return res.status(500).send('The status cannot be updated');
-  } else {
-    res.send(input);
+    if (!input) {
+      return res.status(500).send('The status cannot be updated');
+    } else {
+      res.send(input);
+    }
+  } catch (e) {
+    console.log(e);
   }
 });
 

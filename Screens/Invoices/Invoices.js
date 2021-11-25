@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,42 +7,43 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+import { CredentialsContext } from '../../Shared/CredentialsContext';
+
 import { useSelector, useDispatch } from 'react-redux';
 
 import InvoicesList from './InvoicesList';
 
-import axios from 'axios';
-import baseURL from '../../assets/baseURL';
+import {
+  getInvoicesHandler,
+  deleteInvoceHanler,
+} from '../../Redux/Actions/invoicesActions';
 
 const Invoices = ({ navigation }) => {
-  const [invoices, setInvoices] = useState([]);
-  const [loading, setLoading] = useState(false);
+  //context
+  const { storedCredentials } = useContext(CredentialsContext);
+  const { token, userId } = storedCredentials;
 
-  const invoicesRed = useSelector((state) => {
-    return state.invoicesR;
-  });
+  const dispatch = useDispatch();
 
-  //console.log(invoices);
+  //redux get invoices
+  const invoicesR = useSelector((state) => state.invoicesR);
+  const { invoices, loading, success } = invoicesR;
+
+  //redux delete invoices
+  const deleteInvoicesR = useSelector((state) => state.deleteInvoicesR);
+  const { success: successDel } = deleteInvoicesR;
+
+  //console.log(invoicesR.invoices);
 
   useEffect(() => {
     navigation.addListener('focus', () => {
-      axios
-        .get(`${baseURL}invoices`)
-        .then((res) => {
-          setInvoices(res.data);
-          //dispatch({ type: 'ADD_DAY', payload: res.data });
-
-          //console.log(res.data);
-
-          setLoading(false);
-        })
-        .catch((error) => alert('Error to load Invoices'));
-
-      return () => {
-        setInvoices();
-      };
+      dispatch(getInvoicesHandler(userId));
     });
-  }, [navigation]);
+  }, [dispatch, successDel, navigation]);
+
+  const delInvoiceHandler = (id) => {
+    dispatch(deleteInvoceHanler(id, token));
+  };
 
   const renderInvoices = ({ item }) => {
     return (
@@ -53,54 +54,16 @@ const Invoices = ({ navigation }) => {
           invoiceAmount={item.invoiceAmount}
           invoiceItems={item.invoiceItems}
           invoiceId={item._id}
-          deleteInvoice={handleRemoveInvoice}
+          deleteInvoice={delInvoiceHandler}
         />
       </View>
     );
   };
 
-  const fetchInvoices = () => {
-    axios
-      .get(`${baseURL}invoices`)
-      .then((res) => {
-        setInvoices(res.data);
-        //dispatch({ type: 'ADD_DAY', payload: res.data });
-
-        //console.log(res.data);
-
-        setLoading(false);
-      })
-      .catch((error) => alert('Error to load Invoices'));
-
-    return () => {
-      setInvoices();
-    };
-  };
-
-  const handleRemoveInvoice = (id) => {
-    axios
-      .delete(`${baseURL}invoices/${id}`)
-      .then((res) => {
-        //console.log(res.data.success);
-        const newInvoicesList = invoices.filter((item) => item.id !== id);
-        //const newRates = rates.splice(index, 1);
-        //dispatch({ type: 'ADD_RATE', payload: newRates });
-        setInvoices(newInvoicesList);
-        //console.log(newRates);
-        //setRequestData(new Date());
-        //return [...rates];
-        //setIsRender(true);
-      })
-      .catch((error) => alert('Error to delete invoice'));
-  };
-
   return (
     <View>
-      {loading ? (
-        <View style={styles.spinner}>
-          <ActivityIndicator size="large" color="red" />
-        </View>
-      ) : invoices.length == 0 ? (
+      {loading && <ActivityIndicator size="large" color="red" />}
+      {!invoices ? (
         <Text style={{ textAlign: 'center', marginTop: 30 }}>
           You don't have any invoices created!
         </Text>
@@ -109,8 +72,6 @@ const Invoices = ({ navigation }) => {
           data={invoices}
           renderItem={renderInvoices}
           keyExtractor={(item) => item._id}
-          onRefresh={() => fetchInvoices()}
-          refreshing={loading}
         />
       )}
     </View>

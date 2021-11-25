@@ -2,38 +2,60 @@ const { Rate } = require('../models/rate');
 const express = require('express');
 const router = express.Router(); //middleware
 
-router.get('/', async (req, res) => {
-  const rateList = await Rate.find();
+router.get('/:userId', async (req, res) => {
+  try {
+    const rateList = await Rate.find();
+    //res.status(200).send(rateList);
 
-  if (!rateList) {
-    res.status(500).json({ success: false });
+    const userId = req.params.userId;
+
+    //filter by current user
+    if (userId) {
+      const userRates = rateList.filter((rate) => rate.user == userId);
+
+      if (!userRates) {
+        res.status(500).json({ success: false });
+      }
+      res.status(200).send(userRates);
+    } else {
+      res.status(500).json({ message: 'user not found' });
+    }
+  } catch (err) {
+    console.error(err);
   }
-  res.status(200).send(rateList);
 });
 
 router.get('/:id', async (req, res) => {
-  const rate = await Rate.findById(req.params.id);
+  try {
+    const rate = await Rate.findById(req.params.id);
 
-  if (!rate) {
-    res.status(500).json({ message: 'No rate for the ID selected' });
+    if (!rate) {
+      res.status(500).json({ message: 'No rate for the ID selected' });
+    }
+    res.status(200).send(rate);
+  } catch (err) {
+    console.error(err);
   }
-  res.status(200).send(rate);
 });
 
 router.post(`/`, async (req, res) => {
-  let rate = new Rate({
-    day: req.body.day,
-    value: req.body.value,
-    user: req.body.user,
-  });
+  try {
+    let rate = new Rate({
+      day: req.body.day,
+      value: req.body.value,
+      user: req.body.user,
+    });
 
-  rate = await rate.save(); //this will save/create a new categr=ory
+    rate = await rate.save(); //this will save/create a new categr=ory
 
-  //this conditional is to wait for the data to come from DB before render
-  if (!rate) {
-    return res.status(404).send('The rate cannot be created');
-  } else {
-    res.send(rate);
+    //this conditional is to wait for the data to come from DB before render
+    if (!rate) {
+      return res.status(404).send('The rate cannot be created');
+    } else {
+      res.send(rate);
+    }
+  } catch (err) {
+    console.log(err);
   }
 });
 

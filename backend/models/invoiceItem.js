@@ -8,18 +8,10 @@ const invoiceItemSchema = mongoose.Schema({
       //required: true,
     },
   ],
-  // date: {
-  //   type: String,
-  // },
-  // child: {
-  //   type: String,
-  // },
-  // hours: {
-  //   type: Number,
-  // },
-  // totalAmount: {
-  //   type: Number,
-  // },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
 exports.InvoiceItem = mongoose.model('InvoiceItem', invoiceItemSchema);

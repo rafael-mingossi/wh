@@ -14,6 +14,12 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+]);
+
 var { height } = Dimensions.get('window');
 
 const InvoiceDetails = (props) => {
@@ -33,8 +39,8 @@ const InvoiceDetails = (props) => {
 
   const showConfirmDialog = () => {
     return Alert.alert(
-      'Are your sure?',
-      'Are you sure you want to remove this beautiful box?',
+      'Deleting Invoice?',
+      'Are you sure you want to delete this invoice?',
       [
         // The "Yes" button
         {
