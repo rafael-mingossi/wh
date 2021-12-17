@@ -32,7 +32,7 @@ import {
 const InputsList = ({ navigation }) => {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoices, setInvoices] = useState([]);
-  const [currentAmount, setCurrentAmount] = useState();
+  const [updateList, setUpdateList] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -47,7 +47,7 @@ const InputsList = ({ navigation }) => {
   //redux get invoice items
   const invoiceItemsR = useSelector((state) => state.invoiceItemsR);
   const { items, loading: loadingR } = invoiceItemsR;
-  console.log(items);
+  //console.log(items);
 
   //redux get invoice number
   const invoiceNumberR = useSelector((state) => state.invoiceNumberR);
@@ -85,12 +85,12 @@ const InputsList = ({ navigation }) => {
     if (number) {
       setInvoiceNumber(number.toString());
     }
-  }, [dispatch, successDel, invoices, addSuccess]);
+  }, [dispatch, successDel, invoices, addSuccess, updateList]);
 
   const handleCreateInvoice = () => {
     if (!items || inputs.length < 0 || amount == '$ 0.00') {
       alert('You have no worked days added!');
-    } else if (invoiceNumber === '') {
+    } else if (number === '') {
       alert('Invoice Number cannot be empty!');
     } else {
       let invoiceDetails = {
@@ -132,6 +132,7 @@ const InputsList = ({ navigation }) => {
               text1: 'Invoice Created',
               text2: 'Check Invoice Tab to see details',
             });
+            setUpdateList(true);
           })
           .catch((error) => {
             console.error(error);
